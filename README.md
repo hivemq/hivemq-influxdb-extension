@@ -1,0 +1,1 @@
+# hivemq4-influxdb-plugin
