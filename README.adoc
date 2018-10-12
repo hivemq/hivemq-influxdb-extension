@@ -1,0 +1,77 @@
+== InfluxDB Monitoring Extension for HiveMQ
+
+*Type:* Monitoring
+
+*Version:* 4.0.0
+
+*License:* Apache License 2.0
+
+=== Purpose
+
+The InfluxDB Monitoring extension allows http://www.hivemq.com[HiveMQ^] to connect to an instance of https://www.influxdata.com/time-series-platform/influxdb/[InfluxDB^] for time series monitoring.
+
+=== Installation
+Installing the extension for HiveMQ is very easy:
+
+. Unzip the downloaded zip file
+. In the folder `hivemq-influxdb-extension`, modify the `influxdb.properties` file to fit your needs. Check that the mandatory properties (host, port) are set
+. Copy the folder `hivemq-influxdb-extension` to your `[HIVEMQ_HOME]/extensions` folder
+. Done
+
+
+=== Configuration
+The InfluxDB Monitoring extension uses its own configuration file `influxdb.properties`. The extension won't start if this file is missing or the required properties are not set.
+
+==== General Configuration
+
+|===
+| Config name | Required | Description | Default
+
+| mode | no | The mode configured for the InfluxDB sender. Possibilities are: http, tcp, udp | http
+| host | yes | The host name of the InfluxDB instance. | -
+| port | yes | The port number the InfluxDB instance is listening. | 8086
+| protocol | no | The protocol the InfluxDB sender uses in http mode. | http
+| auth | no | The authorization string to be used to connect to InfluxDB, of format username:password. | -
+| prefix | no | The measurement prefix. | -
+| database | no | The database name. | hivemq
+| reportingInterval | no | The reporting interval in seconds. | 1
+| connectTimeout | no | The connect and read timeout in seconds. | 5000
+| tags | no | The tags for each metric. Listed as a semicolon ( `;` ) separated list. | -
+
+|===
+
+
+.Example Configuration
+[source]
+----
+mode:http
+host:localhost
+port:8086
+protocol:http
+auth:
+
+prefix:
+database:hivemq
+
+reportingInterval:1
+connectTimeout:5000
+
+tags:host=hivemq1
+----
+
+=== First Steps
+
+==== Quick Start InfluxDB
+If you don't already have an InfluxDB instance set up, here is a instruction how to start a not configured InfluxDB instance with Docker.
+
+. Download and install https://www.docker.com/[Docker^] for your platform
+. Start an InfluxDB docker container with the command `docker run -p 8086:8086 -v $PWD:/var/lib/influxdb influxdb`. For more information about using InfluxDB with Docker visit the https://hub.docker.com/_/influxdb/[official Docker repository^] for InfluxDB
+. A local instance of InfluxDB should be running with the port for the database set to 8086
+. Create a database that matches the name set in the property `database` in `influxdb.properties`. For the default `database` value use the command `curl -G http://localhost:8086/query --data-urlencode "q=CREATE DATABASE hivemq"`
+. Done
+
+==== Usage
+After the extension is installed and an InfluxDB instance exists.
+
+. Start HiveMQ
+. Extension successfully started if configuration file exists and contains required properties
