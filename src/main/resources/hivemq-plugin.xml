@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <hivemq-plugin>
-    <id>influxdb-plugin</id>
+    <id>hivemq4-influxdb-plugin</id>
     <name>HiveMQ 4 InfluxDB Plugin</name>
     <version>1.0.0-SNAPSHOT</version>
     <priority>1000</priority>
