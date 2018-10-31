@@ -1,0 +1,80 @@
+:hivemq-link: http://www.hivemq.com
+:influxdb-github-link: https://github.com/influxdata/influxdb
+:hivemq-support: http://www.hivemq.com/support/
+:docker: https://www.docker.com/
+:kitematic: https://kitematic.com/
+:influx-docker-github: https://github.com/tutumcloud/influxdb
+
+
+== InfluxDB Monitoring Plugin
+
+=== Purpose
+
+The InfluxDB Monitoring plugin allows {hivemq-link}[HiveMQ] to connect to an instance of {influxdb-github-link}[InfluxDB] for time series monitoring.
+
+=== Installation InfluxDB Monitoring Plugin
+
+. Copy the jar file `plugins/hivemq-influxdb-monitoring-plugin-&lt;version&gt;.jar` to your `[HIVEMQ_HOME]/plugins` folder
+. Copy the `conf/influxdb.properties` file to your `[HIVEMQ_HOME]/conf` folder
+. Modify the `influxdb.properties` file for your needs
+. Done
+
+=== Quick Start InfluxDB
+
+. Download and install {docker}[Docker] for your platform
+. Download and install {kitematic}[Kitematic]
+. Go to {influx-docker-github}[github.com/tutumcloud/influxdb] and follow the setup instructions
+. Start Kitematic and create an InfluxDB container (under `My Images` tab)
+. Rebind the ports to match your `influxdb.properties`
+. Done
+
+=== Usage
+1. Start InfluxDB
+2. Start HiveMQ
+3. optional: Enable inflxudb plugin
+4. Plugin successfully started if
+
+=== Configuration
+
+The InfluxDB Monitoring plugin uses its own configuration file `influxdb.properties` which must be placed in the `infxludb` plugin folder.
+
+==== General Configuration
+
+|===
+| Config name | Required | Description | Default
+
+| mode | no | The mode configured for the InfluxDB sender. Possibilities are: http, tcp, udp | http
+| host | yes | The host name of the InfluxDB instance. | -
+| port | yes | The port number the InfluxDB instance is listening. | -
+| protocol | no | The protocol the InfluxDB sender uses in http mode. | http
+| auth | no | The authorization string to be used to connect to InfluxDB, of format username:password. | -
+| prefix | no | The measurement prefix. | -
+| database | no | The database name. | hivemq
+| reportingInterval | no | The reporting interval in seconds. | 1
+| connectTimeout | no | The connect and read timeout in seconds. | 5000
+| tags | no | The tags for each metric. Listed as a semicolon ( `;` ) separated list. | -
+
+|===
+
+
+.Example Configuration
+[source]
+----
+mode:http
+host:localhost
+port:8086
+protocol:http
+auth:
+
+prefix:
+database:hivemq
+
+reportingInterval:1
+connectTimeout:5000
+
+tags:host=hivemq1
+----
+
+=== Need help?
+
+If you encounter any problems, we are happy to help. The best place to get in contact is our {hivemq-support}[support].

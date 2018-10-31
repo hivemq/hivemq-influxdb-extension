@@ -1,0 +1,6 @@
+.idea
+target/
+dependency-reduced-pom.xml
+.DS_Store
+src/main/.DS_Store
+/.idea/dictionaries/
