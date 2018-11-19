@@ -17,6 +17,7 @@ import com.izettle.metrics.influxdb.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -37,7 +38,8 @@ public class InfluxDbPluginMain implements PluginMain {
     @Override
     public void pluginStart(@NotNull final PluginStartInput pluginStartInput, @NotNull final PluginStartOutput pluginStartOutput) {
 
-        final InfluxDbConfiguration configuration = new InfluxDbConfiguration(pluginStartInput.getPluginInformation().getPluginHomeFolder());
+        final File pluginHomeFolder = pluginStartInput.getPluginInformation().getPluginHomeFolder();
+        final InfluxDbConfiguration configuration = new InfluxDbConfiguration(pluginHomeFolder);
 
         if (!configuration.readPropertiesFromFile()) {
             pluginStartOutput.preventPluginStartup("Could not read influxdb properties.");
@@ -49,9 +51,14 @@ public class InfluxDbPluginMain implements PluginMain {
             return;
         }
 
-        final MetricRegistry metricRegistry = Services.metricRegistry();
         final InfluxDbSender sender = setupSender(configuration);
 
+        if (sender == null) {
+            pluginStartOutput.preventPluginStartup("Couldn't create an influxdb sender. Please check that the configuration is correct.");
+            return;
+        }
+
+        final MetricRegistry metricRegistry = Services.metricRegistry();
         reporter = setupReporter(metricRegistry, sender, configuration);
         reporter.start(configuration.getReportingInterval(), TimeUnit.SECONDS);
     }

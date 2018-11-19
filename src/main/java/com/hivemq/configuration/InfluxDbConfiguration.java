@@ -29,7 +29,8 @@ import java.util.Properties;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Reads a property file and provides some utility methods for working with {@link Properties}
+ * Reads a property file containing influxdb properties
+ * and provides some utility methods for working with {@link Properties}.
  *
  * @author Christoph Schäbel
  * @author Michael Walter
@@ -62,9 +63,9 @@ public class InfluxDbConfiguration extends PropertiesReader {
     }
 
     /**
-     * Check if mandatory properties exist.
+     * Check if mandatory properties exist and are valid. Mandatory properties are port and host.
      *
-     * @return <b>true</b> if all mandatory properties exist, else <b>false</b>
+     * @return <b>true</b> if all mandatory properties exist, else <b>false</b>.
      */
     public boolean validateConfiguration() {
         int countError = 0;
@@ -92,8 +93,8 @@ public class InfluxDbConfiguration extends PropertiesReader {
     /**
      * Check if mandatory property exists.
      *
-     * @param property Property to check
-     * @return 0 if property exists, else 1
+     * @param property Property to check.
+     * @return 0 if property exists, else 1.
      */
     private int checkMandatoryProperty(@NotNull final String property) {
         checkNotNull(property, "Mandatory property must not be null");
@@ -201,9 +202,9 @@ public class InfluxDbConfiguration extends PropertiesReader {
     /**
      * Fetch property with given <b>key</b>. If the fetched {@link String} is <b>null</b> the <b>defaultValue</b> will be returned.
      *
-     * @param key          Key of the property
-     * @param defaultValue Default value as fallback, if property has no value
-     * @return the actual value of the property if it is set, else the <b>defaultValue</b>
+     * @param key          Key of the property.
+     * @param defaultValue Default value as fallback, if property has no value.
+     * @return the actual value of the property if it is set, else the <b>defaultValue</b>.
      */
     private String validateStringProperty(@NotNull final String key, @NotNull final String defaultValue) {
         checkNotNull(key, "Key to fetch property must not be null");

@@ -28,7 +28,7 @@ import java.util.Properties;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Used to load the content of a {@link File} into {@link Properties}.
+ * Load the content of a {@link File} into {@link Properties}.
  *
  * @author Michael Walter
  */
@@ -88,10 +88,10 @@ public abstract class PropertiesReader {
     }
 
     /**
-     * Loads Properties from configuration {@link File} into {@link Properties}.
+     * Loads the properties from the configuration {@link File} into {@link Properties}.
      *
      * @param file {@link File} where to load the properties from.
-     * @throws IOException if properties could not be read from <b>file</b>
+     * @throws IOException If properties could not be read from <b>file</b>.
      */
     private void loadProperties(@NotNull final File file) throws IOException {
         checkNotNull(file, "File that contains properties must not be null");
