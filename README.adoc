@@ -3,40 +3,40 @@
 :hivemq-support: http://www.hivemq.com/support/
 :docker: https://www.docker.com/
 :kitematic: https://kitematic.com/
-:influx-docker-github: https://github.com/tutumcloud/influxdb
+:influx-docker: https://hub.docker.com/_/influxdb/
 
 
-== InfluxDB Monitoring Plugin
+== InfluxDB Monitoring Plugin for HiveMQ 4
 
 === Purpose
 
-The InfluxDB Monitoring plugin allows {hivemq-link}[HiveMQ] to connect to an instance of {influxdb-github-link}[InfluxDB] for time series monitoring.
+The InfluxDB Monitoring plugin allows {hivemq-link}[HiveMQ 4] to connect to an instance of {influxdb-github-link}[InfluxDB] for time series monitoring.
 
 === Installation InfluxDB Monitoring Plugin
+Installing the plugin for HiveMQ 4 is very easy:
 
-. Copy the jar file `plugins/hivemq-influxdb-monitoring-plugin-&lt;version&gt;.jar` to your `[HIVEMQ_HOME]/plugins` folder
-. Copy the `conf/influxdb.properties` file to your `[HIVEMQ_HOME]/conf` folder
-. Modify the `influxdb.properties` file for your needs
+. Copy the folder `hivemq4-influxdb-monitoring-plugin` to your `[HIVEMQ_HOME]/plugins` folder
+. In the plugin folder, modify the `influxdb.properties` file to fit your needs, check that the mandatory properties are set
+. Remove (or rename) the `DISABLED` file in the plugin folder to enable the InfluxDB plugin
 . Done
 
 === Quick Start InfluxDB
+If you don't already have an InfluxDB instance set up, here is a instruction how to start an basic InfluxDB instance with Docker.
 
 . Download and install {docker}[Docker] for your platform
-. Download and install {kitematic}[Kitematic]
-. Go to {influx-docker-github}[github.com/tutumcloud/influxdb] and follow the setup instructions
-. Start Kitematic and create an InfluxDB container (under `My Images` tab)
-. Rebind the ports to match your `influxdb.properties`
+. Start an InfluxDB container with the command `docker run -p 8086:8086 -v $PWD:/var/lib/influxdb influxdb`. For more information about using InfluxDB with Docker visit the {influx-docker}[official Docker repository] for InfluxDB
+. Create a database that matches the name set in the property `database` in `influxdb.properties`. For the default `database` value use the command `curl -G http://localhost:8086/query --data-urlencode "q=CREATE DATABASE hivemq"`
 . Done
 
 === Usage
-1. Start InfluxDB
-2. Start HiveMQ
-3. optional: Enable inflxudb plugin
-4. Plugin successfully started if
+After the plugin is installed and an InfluxDB instance exists.
+
+. If not already done, enable the plugin (remove or rename the `DISABLED` file)
+. Start HiveMQ 4
+. Plugin successfully started if configuration file exists and contains required properties
 
 === Configuration
-
-The InfluxDB Monitoring plugin uses its own configuration file `influxdb.properties` which must be placed in the `infxludb` plugin folder.
+The InfluxDB Monitoring plugin uses its own configuration file `influxdb.properties`. The plugin won't start if this file is missing or the required properties are not set.
 
 ==== General Configuration
 
