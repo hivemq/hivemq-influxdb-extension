@@ -73,6 +73,11 @@ public class InfluxDbConfiguration extends PropertiesReader {
         countError += checkMandatoryProperty(HOST);
         countError += checkMandatoryProperty(PORT);
 
+        if (countError != 0){
+            return false;
+        }
+
+        // check for valid port value
         final String port = getProperty(PORT);
         try {
             final int intPort = Integer.parseInt(port);
@@ -84,6 +89,13 @@ public class InfluxDbConfiguration extends PropertiesReader {
 
         } catch (NumberFormatException e) {
             log.error("Value for mandatory InfluxDB property {} is not a number.", PORT);
+            countError++;
+        }
+
+        // check if host is still --INFLUX-DB-IP--
+        final String host = getProperty(HOST);
+
+        if (host.equals("--INFLUX-DB-IP--")) {
             countError++;
         }
 
@@ -213,7 +225,10 @@ public class InfluxDbConfiguration extends PropertiesReader {
         final String value = getProperty(key);
 
         if (value == null) {
-            log.warn("No '{}' configured for InfluxDb, using default: {}", key, defaultValue);
+
+            if (!defaultValue.isEmpty()) {
+                log.warn("No '{}' configured for InfluxDb, using default: {}", key, defaultValue);
+            }
             return defaultValue;
         }
 
