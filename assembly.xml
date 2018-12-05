@@ -8,33 +8,34 @@
         <format>zip</format>
     </formats>
 
-    <includeBaseDirectory>false</includeBaseDirectory>
-
     <files>
         <file>
-            <source>target/README.html</source>
-            <outputDirectory>/hivemq4-influxdb-plugin/</outputDirectory>
+            <source>target/LICENSE.txt</source>
+            <outputDirectory>/${artifactId}/</outputDirectory>
         </file>
         <file>
-            <source>LICENSE.txt</source>
-            <outputDirectory>/hivemq4-influxdb-plugin/</outputDirectory>
+            <source>target/README.html</source>
+            <outputDirectory>/${artifactId}/</outputDirectory>
+        </file>
+        <file>
+            <source>README.adoc</source>
+            <destName>README.txt</destName>
+            <outputDirectory>/${artifactId}/</outputDirectory>
         </file>
         <file>
             <source>src/main/resources/influxdb.properties</source>
-            <outputDirectory>/hivemq4-influxdb-plugin/</outputDirectory>
-        </file>
-        <file>
-            <source>src/main/resources/DISABLED</source>
-            <outputDirectory>/hivemq4-influxdb-plugin/</outputDirectory>
+            <outputDirectory>/${artifactId}/</outputDirectory>
         </file>
         <file>
             <source>src/main/resources/hivemq-plugin.xml</source>
-            <outputDirectory>/hivemq4-influxdb-plugin/</outputDirectory>
+            <outputDirectory>/${artifactId}/</outputDirectory>
+            <filtered>true</filtered>
         </file>
         <file>
             <source>target/${artifactId}-${version}.jar</source>
             <destName>${artifactId}-${version}.jar</destName>
-            <outputDirectory>/hivemq4-influxdb-plugin/</outputDirectory>
+            <outputDirectory>/${artifactId}/</outputDirectory>
         </file>
     </files>
+    <includeBaseDirectory>false</includeBaseDirectory>
 </assembly>

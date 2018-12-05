@@ -6,7 +6,10 @@
 
     <groupId>com.hivemq.plugin</groupId>
     <artifactId>hivemq4-influxdb-plugin</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <properties>
+        <plugin.name>InfluxDB Monitoring Plugin</plugin.name>
+    </properties>
+    <version>4.0.0</version>
 
     <dependencies>
         <dependency>
