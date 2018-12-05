@@ -1,3 +1,18 @@
+/*
+ * Copyright 2018 dc-square GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.hivemq.plugin;
 
 import com.codahale.metrics.MetricFilter;
@@ -38,29 +53,34 @@ public class InfluxDbPluginMain implements PluginMain {
     @Override
     public void pluginStart(@NotNull final PluginStartInput pluginStartInput, @NotNull final PluginStartOutput pluginStartOutput) {
 
-        final File pluginHomeFolder = pluginStartInput.getPluginInformation().getPluginHomeFolder();
-        final InfluxDbConfiguration configuration = new InfluxDbConfiguration(pluginHomeFolder);
+        try {
+            final File pluginHomeFolder = pluginStartInput.getPluginInformation().getPluginHomeFolder();
+            final InfluxDbConfiguration configuration = new InfluxDbConfiguration(pluginHomeFolder);
 
-        if (!configuration.readPropertiesFromFile()) {
-            pluginStartOutput.preventPluginStartup("Could not read influxdb properties.");
-            return;
+            if (!configuration.readPropertiesFromFile()) {
+                pluginStartOutput.preventPluginStartup("Could not read influxdb properties.");
+                return;
+            }
+
+            if (!configuration.validateConfiguration()) {
+                pluginStartOutput.preventPluginStartup("At least one mandatory property not set.");
+                return;
+            }
+
+            final InfluxDbSender sender = setupSender(configuration);
+
+            if (sender == null) {
+                pluginStartOutput.preventPluginStartup("Couldn't create an influxdb sender. Please check that the configuration is correct.");
+                return;
+            }
+
+            final MetricRegistry metricRegistry = Services.metricRegistry();
+            reporter = setupReporter(metricRegistry, sender, configuration);
+            reporter.start(configuration.getReportingInterval(), TimeUnit.SECONDS);
+        } catch (Exception e) {
+            log.warn("Start failed because of", e);
+            pluginStartOutput.preventPluginStartup("Start failed because of an exception");
         }
-
-        if (!configuration.validateConfiguration()) {
-            pluginStartOutput.preventPluginStartup("At least one mandatory property not set.");
-            return;
-        }
-
-        final InfluxDbSender sender = setupSender(configuration);
-
-        if (sender == null) {
-            pluginStartOutput.preventPluginStartup("Couldn't create an influxdb sender. Please check that the configuration is correct.");
-            return;
-        }
-
-        final MetricRegistry metricRegistry = Services.metricRegistry();
-        reporter = setupReporter(metricRegistry, sender, configuration);
-        reporter.start(configuration.getReportingInterval(), TimeUnit.SECONDS);
     }
 
     @Override
