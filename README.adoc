@@ -14,7 +14,7 @@
 
 === Purpose
 
-The HiveMQ {influxdb-link}[InfluxDB^] Extension can be leveraged to gather metrics from {hivemq-link}[HiveMQ^] and persist them into a time series database. This database can be used as the data source for a monitoring dashboard that drills down into the inner workings of HiveMQ and provides valuable insights to your operations team.
+The HiveMQ {influxdb-link}[InfluxDB^] Extension can be leveraged to gather metrics from {hivemq-link}[HiveMQ^] and persist them into a time series database. This database can be used as the data source for a monitoring dashboard (like Grafana) that drills down into the inner workings of HiveMQ and provides valuable insights to your operations team.
 
 === Installation
 Installing the extension for HiveMQ is very easy:
