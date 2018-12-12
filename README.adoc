@@ -6,7 +6,7 @@
 
 == InfluxDB Monitoring Extension for HiveMQ
 
-*Type:* Monitoring
+*Extension Type:* Monitoring
 
 *Version:* 4.0.0
 
@@ -14,7 +14,7 @@
 
 === Purpose
 
-The InfluxDB Monitoring extension allows {hivemq-link}[HiveMQ^] to connect to an instance of {influxdb-link}[InfluxDB^] for time series monitoring.
+The HiveMQ {influxdb-link}[InfluxDB^] Extension can be leveraged to gather metrics from {hivemq-link}[HiveMQ^] and persist them into a time series database. This database can be used as the data source for a monitoring dashboard that drills down into the inner workings of HiveMQ and provides valuable insights to your operations team.
 
 === Installation
 Installing the extension for HiveMQ is very easy:
