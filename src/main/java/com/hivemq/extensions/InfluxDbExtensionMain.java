@@ -122,6 +122,10 @@ public class InfluxDbExtensionMain implements ExtensionMain {
         final int connectTimeout = configuration.getConnectTimeout();
         final String prefix = configuration.getPrefix();
 
+        // cloud
+        final String bucket = configuration.getBucket();
+        final String organization = configuration.getOrganization();
+
         InfluxDbSender sender = null;
 
         try {
@@ -137,6 +141,12 @@ public class InfluxDbExtensionMain implements ExtensionMain {
                 case "udp":
                     log.info("Creating InfluxDB UDP sender for server {}:{} and database {}", host, port, database);
                     sender = new InfluxDbUdpSender(host, port, connectTimeout, database, prefix);
+                    break;
+                case "cloud":
+                    log.info("Creating InfluxDB Cloud sender for endpoint {}, bucket {}, organization {}", host, bucket, organization);
+                    checkNotNull(bucket, "Bucket name must be defined in cloud mode");
+                    checkNotNull(organization, "Organization must be defined in cloud mode");
+                    sender = new InfluxDbCloudSender(protocol, host, port, database, auth, TimeUnit.SECONDS, connectTimeout, connectTimeout, prefix, organization, bucket);
                     break;
 
             }
