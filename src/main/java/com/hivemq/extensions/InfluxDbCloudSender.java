@@ -1,7 +1,10 @@
 package com.hivemq.extensions;
 
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.izettle.metrics.influxdb.InfluxDbHttpSender;
 import com.izettle.metrics.influxdb.utils.TimeUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -26,12 +29,15 @@ public class InfluxDbCloudSender extends InfluxDbHttpSender {
         this.connectTimeout = connectTimeout;
         this.readTimeout = readTimeout;
 
-        final String endpoint = new URL(protocol, cloudUrl, port, "/write").toString();
-        final String queryDb = String.format("db=%s", URLEncoder.encode(database, StandardCharsets.UTF_8));
+
+        final String endpoint = String.format("https://%s/api/v2/write", cloudUrl);
         final String queryPrecision = String.format("precision=%s", TimeUtils.toTimePrecision(timePrecision));
         final String orgParameter = String.format("org=%s", URLEncoder.encode(organization, StandardCharsets.UTF_8));
         final String bucketParameter = String.format("bucket=%s", URLEncoder.encode(bucket, StandardCharsets.UTF_8));
-        this.url = new URL(endpoint + "?" + queryDb + "&" + queryPrecision + "&" + orgParameter + "&" + bucketParameter);
+        this.url = new URL(endpoint +
+                "?" + orgParameter +
+                "&" + bucketParameter +
+                "&" + queryPrecision);
     }
 
     @Override
