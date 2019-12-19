@@ -23,8 +23,13 @@
     <artifactId>hivemq-influxdb-extension</artifactId>
     <properties>
         <extension.name>InfluxDB Monitoring Extension</extension.name>
+        <extension.author>HiveMQ</extension.author>
+
+        <asciidoctor.version>1.5.2.1</asciidoctor.version>
+        <output.dir>${basedir}</output.dir>
+        <source.document.name>README.adoc</source.document.name>
     </properties>
-    <version>4.0.0</version>
+    <version>4.1.0</version>
 
     <dependencies>
         <dependency>
@@ -65,6 +70,12 @@
             <artifactId>slf4j-api</artifactId>
             <version>1.7.25</version>
         </dependency>
+        <dependency>
+            <groupId>com.github.tomakehurst</groupId>
+            <artifactId>wiremock-jre8-standalone</artifactId>
+            <version>2.25.1</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -72,16 +83,16 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.1</version>
+                <version>3.8.0</version>
                 <configuration>
-                    <source>10</source>
-                    <target>10</target>
+                    <source>11</source>
+                    <target>11</target>
                 </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>2.1</version>
+                <version>3.1.1</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -91,67 +102,90 @@
                         <configuration>
                             <artifactSet>
                                 <excludes>
-                                    <exclude>com.google.guava:*</exclude>
+                                    <exclude>com.hivemq:hivemq-extension-sdk</exclude>
                                     <exclude>org.slf4j:*</exclude>
                                     <exclude>ch.qos.logback:*</exclude>
-                                    <exclude>javax.ws.rs:*</exclude>
                                     <exclude>javax.servlet:*</exclude>
                                 </excludes>
                             </artifactSet>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <descriptors>
+                                <descriptor>assembly.xml</descriptor>
+                            </descriptors>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.asciidoctor</groupId>
+                <artifactId>asciidoctor-maven-plugin</artifactId>
+                <version>${asciidoctor.version}</version>
+                <executions>
+                    <execution>
+                        <id>output-html</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>process-asciidoc</goal>
+                        </goals>
+                        <configuration>
+                            <backend>html</backend>
+                            <doctype>xhtml</doctype>
+                            <headerFooter>true</headerFooter>
+                            <sourceDirectory>${basedir}</sourceDirectory>
+                            <outputDirectory>${output.dir}/target</outputDirectory>
+                            <sourceDocumentName>${source.document.name}</sourceDocumentName>
+                            <attributes>
+                                <icons>font</icons>
+                                <toc2/>
+                            </attributes>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
         </plugins>
     </build>
-
     <profiles>
         <profile>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <id>Packaging</id>
+            <id>RunWithHiveMQ</id>
             <build>
                 <plugins>
                     <plugin>
-                        <artifactId>maven-assembly-plugin</artifactId>
+                        <groupId>com.hivemq</groupId>
+                        <artifactId>hivemq-maven-plugin</artifactId>
+                        <version>4.0.2</version>
                         <executions>
                             <execution>
-                                <id>assembly</id>
+                                <id>hivemq</id>
                                 <phase>package</phase>
                                 <goals>
-                                    <goal>single</goal>
+                                    <goal>hivemq</goal>
                                 </goals>
                                 <configuration>
-                                    <descriptors>
-                                        <descriptor>assembly.xml</descriptor>
-                                    </descriptors>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.asciidoctor</groupId>
-                        <artifactId>asciidoctor-maven-plugin</artifactId>
-                        <version>1.5.2.1</version>
-                        <executions>
-                            <execution>
-                                <id>output-html</id>
-                                <phase>generate-resources</phase>
-                                <goals>
-                                    <goal>process-asciidoc</goal>
-                                </goals>
-                                <configuration>
-                                    <backend>html</backend>
-                                    <doctype>xhtml</doctype>
-                                    <headerFooter>true</headerFooter>
-                                    <sourceDirectory>${basedir}</sourceDirectory>
-                                    <outputDirectory>${basedir}/target</outputDirectory>
-                                    <sourceDocumentName>README.adoc</sourceDocumentName>
-                                    <attributes>
-                                        <icons>font</icons>
-                                        <toc2/>
-                                    </attributes>
+                                    <hiveMQDir><!-- YOUR_HIVEMQ_HOME_FOLDER --></hiveMQDir>
+                                    <debugMode>SERVER</debugMode>
                                 </configuration>
                             </execution>
                         </executions>

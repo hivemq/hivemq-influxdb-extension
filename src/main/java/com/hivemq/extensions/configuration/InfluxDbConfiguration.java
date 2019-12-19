@@ -57,6 +57,10 @@ public class InfluxDbConfiguration extends PropertiesReader {
     private static final String TAGS = "tags";
     private static final HashMap<String, String> TAGS_DEFAULT = new HashMap<>();
 
+    //InfluxDB Cloud
+    private static final String BUCKET = "bucket";
+    private static final String ORGANIZATION = "organization";
+
 
     public InfluxDbConfiguration(@NotNull final File configFilePath) {
         super(configFilePath);
@@ -204,6 +208,16 @@ public class InfluxDbConfiguration extends PropertiesReader {
         }
 
         return tagMap;
+    }
+
+    @Nullable
+    public String getBucket() {
+        return getProperty(BUCKET);
+    }
+
+    @Nullable
+    public String getOrganization() {
+        return getProperty(ORGANIZATION);
     }
 
     @Override

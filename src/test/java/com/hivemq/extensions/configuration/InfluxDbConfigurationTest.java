@@ -297,4 +297,46 @@ public class InfluxDbConfigurationTest {
         assertEquals(1, propertiesReader.getReportingInterval());
     }
 
+    @Test
+    public void validateConfiguration_cloud_token_missing() throws IOException {
+
+        final List<String> lines = Arrays.asList("mode:cloud", "host:localhost", "bucket:mybucket");
+        Files.write(file.toPath(), lines, Charset.forName("UTF-8"));
+
+        final InfluxDbConfiguration propertiesReader = new InfluxDbConfiguration(root);
+
+        propertiesReader.readPropertiesFromFile();
+        final boolean validateConfiguration = propertiesReader.validateConfiguration();
+
+        assertFalse(validateConfiguration);
+    }
+
+    @Test
+    public void validateConfiguration_cloud_bucket_missing() throws IOException {
+
+        final List<String> lines = Arrays.asList("mode:cloud", "host:localhost", "token:mytoken");
+        Files.write(file.toPath(), lines, Charset.forName("UTF-8"));
+
+        final InfluxDbConfiguration propertiesReader = new InfluxDbConfiguration(root);
+
+        propertiesReader.readPropertiesFromFile();
+        final boolean validateConfiguration = propertiesReader.validateConfiguration();
+
+        assertFalse(validateConfiguration);
+    }
+
+    @Test
+    public void validateConfiguration_cloud_ok() throws IOException {
+
+        final List<String> lines = Arrays.asList("mode:cloud", "host:localhost", "token:mytoken", "bucket:mybucket");
+        Files.write(file.toPath(), lines, Charset.forName("UTF-8"));
+
+        final InfluxDbConfiguration propertiesReader = new InfluxDbConfiguration(root);
+
+        propertiesReader.readPropertiesFromFile();
+        final boolean validateConfiguration = propertiesReader.validateConfiguration();
+
+        assertFalse(validateConfiguration);
+    }
+
 }

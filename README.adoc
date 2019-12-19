@@ -8,7 +8,7 @@
 
 *Extension Type:* Monitoring
 
-*Version:* 4.0.0
+*Version:* 4.1.0
 
 *License:* Apache License 2.0
 
@@ -33,16 +33,18 @@ The InfluxDB Monitoring extension uses its own configuration file `influxdb.prop
 |===
 | Config name | Required | Description | Default
 
-| mode | no | The mode configured for the InfluxDB sender. Possibilities are: http, tcp, udp | http
+| mode | no | The mode configured for the InfluxDB sender. Possibilities are: http, tcp, udp, cloud | http
 | host | yes | The host name of the InfluxDB instance. | -
 | port | yes | The port number the InfluxDB instance is listening. | 8086
 | protocol | no | The protocol the InfluxDB sender uses in http mode. | http
-| auth | no | The authorization string to be used to connect to InfluxDB, of format username:password. | -
+| auth | no | The authorization string to be used to connect to InfluxDB, of format username:password. If mode "cloud" is used, the token must be passed here| -
 | prefix | no | The measurement prefix. | -
 | database | no | The database name. | hivemq
 | reportingInterval | no | The reporting interval in seconds. | 1
 | connectTimeout | no | The connect and read timeout in seconds. | 5000
 | tags | no | The tags for each metric. Listed as a semicolon ( `;` ) separated list. | -
+| organization | only for mode: "cloud" | The organization to push data to | -
+| bucket | only for mode: "cloud" | The bucket to push data to | -
 
 |===
 
