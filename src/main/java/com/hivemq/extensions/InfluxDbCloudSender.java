@@ -1,10 +1,7 @@
 package com.hivemq.extensions;
 
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.izettle.metrics.influxdb.InfluxDbHttpSender;
 import com.izettle.metrics.influxdb.utils.TimeUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -13,6 +10,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
+import java.util.zip.GZIPOutputStream;
 
 public class InfluxDbCloudSender extends InfluxDbHttpSender {
     private final String authToken;
@@ -20,24 +18,20 @@ public class InfluxDbCloudSender extends InfluxDbHttpSender {
     private final int readTimeout;
     private final URL url;
 
-    public InfluxDbCloudSender(String protocol, String cloudUrl, int port, String database,
-                               String authString, TimeUnit timePrecision,
+    public InfluxDbCloudSender(String protocol, String host, int port,
+                               String authToken, TimeUnit timePrecision,
                                int connectTimeout, int readTimeout, String measurementPrefix,
                                final String organization, final String bucket) throws Exception {
-        super(protocol, cloudUrl, port, database, authString, timePrecision, connectTimeout, readTimeout, measurementPrefix);
-        this.authToken = authString;
+        super(protocol, host, port, "", authToken, timePrecision, connectTimeout, readTimeout, measurementPrefix);
+        this.authToken = authToken;
         this.connectTimeout = connectTimeout;
         this.readTimeout = readTimeout;
 
-
-        final String endpoint = String.format("https://%s/api/v2/write", cloudUrl);
+        final String endpoint = new URL(protocol, host, port, "/api/v2/write").toString();
         final String queryPrecision = String.format("precision=%s", TimeUtils.toTimePrecision(timePrecision));
         final String orgParameter = String.format("org=%s", URLEncoder.encode(organization, StandardCharsets.UTF_8));
         final String bucketParameter = String.format("bucket=%s", URLEncoder.encode(bucket, StandardCharsets.UTF_8));
-        this.url = new URL(endpoint +
-                "?" + orgParameter +
-                "&" + bucketParameter +
-                "&" + queryPrecision);
+        this.url = new URL(endpoint + "?" + queryPrecision + "&" + orgParameter + "&" + bucketParameter);
     }
 
     @Override
@@ -48,13 +42,12 @@ public class InfluxDbCloudSender extends InfluxDbHttpSender {
         con.setDoOutput(true);
         con.setConnectTimeout(connectTimeout);
         con.setReadTimeout(readTimeout);
+        con.setRequestProperty("Content-Encoding", "gzip");
 
-        OutputStream out = con.getOutputStream();
-        try {
-            out.write(line);
+        try (OutputStream out = con.getOutputStream(); final GZIPOutputStream gzipOutputStream = new GZIPOutputStream(out)) {
+            gzipOutputStream.write(line);
+            gzipOutputStream.flush();
             out.flush();
-        } finally {
-            out.close();
         }
 
         int responseCode = con.getResponseCode();
