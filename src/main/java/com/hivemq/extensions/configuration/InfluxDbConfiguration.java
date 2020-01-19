@@ -46,6 +46,7 @@ public class InfluxDbConfiguration extends PropertiesReader {
     private static final String PROTOCOL = "protocol";
     private static final String PROTOCOL_DEFAULT = "http";
     private static final String REPORTING_INTERVAL = "reportingInterval";
+    private static final String FILTERED_REPORTING_INTERVAL = "filteredReportingInterval";
     private static final int REPORTING_INTERVAL_DEFAULT = 1;
     private static final String PREFIX = "prefix";
     private static final String PREFIX_DEFAULT = "";
@@ -56,6 +57,8 @@ public class InfluxDbConfiguration extends PropertiesReader {
     private static final String AUTH = "auth";
     private static final String TAGS = "tags";
     private static final HashMap<String, String> TAGS_DEFAULT = new HashMap<>();
+    private static final String METRICS_FILTER_LIST = "metricsFilterList";
+    private static final String CONSOLE_DEBUG = "consoleDebug";
 
     //InfluxDB Cloud
     private static final String BUCKET = "bucket";
@@ -73,6 +76,8 @@ public class InfluxDbConfiguration extends PropertiesReader {
      */
     public boolean validateConfiguration() {
         int countError = 0;
+
+        if (Boolean.parseBoolean(getProperty(CONSOLE_DEBUG))) return true;
 
         countError += checkMandatoryProperty(HOST);
         countError += checkMandatoryProperty(PORT);
@@ -159,6 +164,10 @@ public class InfluxDbConfiguration extends PropertiesReader {
         return validateIntProperty(REPORTING_INTERVAL, REPORTING_INTERVAL_DEFAULT, false, false);
     }
 
+    public int getFilteredReportingInterval() {
+        return validateIntProperty(FILTERED_REPORTING_INTERVAL, REPORTING_INTERVAL_DEFAULT, false, false);
+    }
+
     public int getConnectTimeout() {
         return validateIntProperty(CONNECT_TIMEOUT, CONNECT_TIMEOUT_DEFAULT, false, false);
     }
@@ -225,6 +234,16 @@ public class InfluxDbConfiguration extends PropertiesReader {
         return "influxdb.properties";
     }
 
+    @Nullable
+    public String getMetricFilter() {
+        return getProperty(METRICS_FILTER_LIST);
+    }
+
+    @Nullable
+    public boolean consoleDebugging() {
+        return Boolean.parseBoolean(getProperty(CONSOLE_DEBUG));
+    }
+
     /**
      * Fetch property with given <b>key</b>. If the fetched {@link String} is <b>null</b> the <b>defaultValue</b> will be returned.
      *
@@ -251,7 +270,8 @@ public class InfluxDbConfiguration extends PropertiesReader {
 
     /**
      * Fetch property with given <b>key</b>.
-     * If the fetched {@link String} value is not <b>null</b> convert the value to an int and check validation constraints if given flags are <b>false</b> before returning the value.
+     * If the fetched {@link String} value is not <b>null</b> convert the value to an int and check validation
+     * constraints if given flags are <b>false</b> before returning the value.
      *
      * @param key             Key of the property
      * @param defaultValue    Default value as fallback, if property has no value

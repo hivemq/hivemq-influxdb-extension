@@ -13,7 +13,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.List;
@@ -69,7 +69,7 @@ public class InfluxDbExtensionMainTest {
     public void extensionStart_failed_configuration_file_not_valid() throws IOException {
 
         final List<String> lines = Arrays.asList("host:localhost", "port:-3000");
-        Files.write(file.toPath(), lines, Charset.forName("UTF-8"));
+        Files.write(file.toPath(), lines, StandardCharsets.UTF_8);
 
         final InfluxDbExtensionMain main = new InfluxDbExtensionMain();
         when(extensionStartInput.getExtensionInformation()).thenReturn(extensionInformation);
@@ -86,7 +86,7 @@ public class InfluxDbExtensionMainTest {
     public void extensionStart_failed_configuration_file_valid() throws IOException {
 
         final List<String> lines = Arrays.asList("host:localhost", "port:3000");
-        Files.write(file.toPath(), lines, Charset.forName("UTF-8"));
+        Files.write(file.toPath(), lines, StandardCharsets.UTF_8);
 
         final InfluxDbExtensionMain main = new InfluxDbExtensionMain();
         when(extensionStartInput.getExtensionInformation()).thenReturn(extensionInformation);

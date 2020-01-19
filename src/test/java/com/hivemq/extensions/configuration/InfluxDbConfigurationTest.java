@@ -8,7 +8,7 @@ import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Collections;
@@ -35,90 +35,46 @@ public class InfluxDbConfigurationTest {
 
     @Test
     public void validateConfiguration_ok() throws IOException {
-
         final List<String> lines = Arrays.asList("host:localhost", "port:3000");
-        Files.write(file.toPath(), lines, Charset.forName("UTF-8"));
-
-        final InfluxDbConfiguration propertiesReader = new InfluxDbConfiguration(root);
-
-        propertiesReader.readPropertiesFromFile();
-        final boolean validateConfiguration = propertiesReader.validateConfiguration();
-
-        assertTrue(validateConfiguration);
+        assertTrue(validateConfig(lines));
     }
 
     @Test
     public void validateConfiguration_wrong_port() throws IOException {
-
         final List<String> lines = Arrays.asList("host:localhost", "port:-3000");
-        Files.write(file.toPath(), lines, Charset.forName("UTF-8"));
-
-        final InfluxDbConfiguration propertiesReader = new InfluxDbConfiguration(root);
-
-        propertiesReader.readPropertiesFromFile();
-        final boolean validateConfiguration = propertiesReader.validateConfiguration();
-
-        assertFalse(validateConfiguration);
+        assertFalse(validateConfig(lines));
     }
 
     @Test
     public void validateConfiguration_host_missing() throws IOException {
-
         final List<String> lines = Collections.singletonList("port:3000");
-        Files.write(file.toPath(), lines, Charset.forName("UTF-8"));
-
-        final InfluxDbConfiguration propertiesReader = new InfluxDbConfiguration(root);
-
-        propertiesReader.readPropertiesFromFile();
-        final boolean validateConfiguration = propertiesReader.validateConfiguration();
-
-        assertFalse(validateConfiguration);
+        assertFalse(validateConfig(lines));
     }
 
     @Test
     public void validateConfiguration_port_missing() throws IOException {
-
         final List<String> lines = Collections.singletonList("host:localhost");
-        Files.write(file.toPath(), lines, Charset.forName("UTF-8"));
-
-        final InfluxDbConfiguration propertiesReader = new InfluxDbConfiguration(root);
-
-        propertiesReader.readPropertiesFromFile();
-        final boolean validateConfiguration = propertiesReader.validateConfiguration();
-
-        assertFalse(validateConfiguration);
+        assertFalse(validateConfig(lines));
     }
 
     @Test
     public void validateConfiguration_port_null() throws IOException {
 
         final List<String> lines = Arrays.asList("host:localhost", "port:");
-        Files.write(file.toPath(), lines, Charset.forName("UTF-8"));
+        final InfluxDbConfiguration propertiesReader = getConfig(lines);
 
-        final InfluxDbConfiguration propertiesReader = new InfluxDbConfiguration(root);
-
-        propertiesReader.readPropertiesFromFile();
         assertNull(propertiesReader.getProperty("port"));
-
-        final boolean validateConfiguration = propertiesReader.validateConfiguration();
-
-        assertFalse(validateConfiguration);
+        assertFalse(propertiesReader.validateConfiguration());
     }
 
     @Test
     public void validateConfiguration_host_null() throws IOException {
 
         final List<String> lines = Arrays.asList("host:", "port:3000");
-        Files.write(file.toPath(), lines, Charset.forName("UTF-8"));
+        final InfluxDbConfiguration propertiesReader = getConfig(lines);
 
-        final InfluxDbConfiguration propertiesReader = new InfluxDbConfiguration(root);
-
-        propertiesReader.readPropertiesFromFile();
         assertNull(propertiesReader.getProperty("host"));
-
-        final boolean validateConfiguration = propertiesReader.validateConfiguration();
-
-        assertFalse(validateConfiguration);
+        assertFalse(propertiesReader.validateConfiguration());
     }
 
     @Test
@@ -135,12 +91,7 @@ public class InfluxDbConfigurationTest {
                 "connectTimeout:",
                 "reportingInterval:",
                 "auth:");
-        Files.write(file.toPath(), lines, Charset.forName("UTF-8"));
-
-        final InfluxDbConfiguration propertiesReader = new InfluxDbConfiguration(root);
-
-        propertiesReader.readPropertiesFromFile();
-
+        final InfluxDbConfiguration propertiesReader = getConfig(lines);
 
         assertFalse(propertiesReader.validateConfiguration());
         assertEquals("http", propertiesReader.getMode());
@@ -159,12 +110,8 @@ public class InfluxDbConfigurationTest {
     public void all_properties_null() throws IOException {
 
         final List<String> lines = Collections.emptyList();
-        Files.write(file.toPath(), lines, Charset.forName("UTF-8"));
-
-        final InfluxDbConfiguration propertiesReader = new InfluxDbConfiguration(root);
-
-        propertiesReader.readPropertiesFromFile();
-        final String mode = propertiesReader.getMode();
+        final InfluxDbConfiguration propertiesReader = getConfig(lines);
+        propertiesReader.getMode();
 
         assertFalse(propertiesReader.validateConfiguration());
         assertEquals("http", propertiesReader.getMode());
@@ -191,12 +138,11 @@ public class InfluxDbConfigurationTest {
                 "protocol:tcp",
                 "database:test-hivemq",
                 "connectTimeout:10000",
-                "reportingInterval:5",
+                "filteredReportingInterval:5",
+                "reportingInterval:60",
+                "metricsFilterList:com.hivemq",
                 "auth:username:password");
-        Files.write(file.toPath(), lines, Charset.forName("UTF-8"));
-
-        final InfluxDbConfiguration propertiesReader = new InfluxDbConfiguration(root);
-        propertiesReader.readPropertiesFromFile();
+        final InfluxDbConfiguration propertiesReader = getConfig(lines);
 
         @NotNull final Map<String, String> tags = propertiesReader.getTags();
 
@@ -209,7 +155,9 @@ public class InfluxDbConfigurationTest {
         assertEquals("tcp", propertiesReader.getProtocol());
         assertEquals("test-hivemq", propertiesReader.getDatabase());
         assertEquals(10000, propertiesReader.getConnectTimeout());
-        assertEquals(5, propertiesReader.getReportingInterval());
+        assertEquals(60, propertiesReader.getReportingInterval());
+        assertEquals(5, propertiesReader.getFilteredReportingInterval());
+        assertEquals("com.hivemq", propertiesReader.getMetricFilter());
         assertEquals("username:password", propertiesReader.getAuth());
         assertEquals("hivemq.monitoring.com", propertiesReader.getHost());
         assertEquals(3000, propertiesReader.getPort().intValue());
@@ -220,10 +168,7 @@ public class InfluxDbConfigurationTest {
 
         final List<String> lines = Collections.singletonList(
                 "tags:host=hivemq1;version=;use=monitoring");
-        Files.write(file.toPath(), lines, Charset.forName("UTF-8"));
-
-        final InfluxDbConfiguration propertiesReader = new InfluxDbConfiguration(root);
-        propertiesReader.readPropertiesFromFile();
+        final InfluxDbConfiguration propertiesReader = getConfig(lines);
 
         final Map<String, String> tags = propertiesReader.getTags();
 
@@ -237,45 +182,30 @@ public class InfluxDbConfigurationTest {
     @Test
     public void tags_has_only_semicolons() throws IOException {
 
-        final List<String> lines = Collections.singletonList(
-                "tags:;;;;;;");
-        Files.write(file.toPath(), lines, Charset.forName("UTF-8"));
-
-        final InfluxDbConfiguration propertiesReader = new InfluxDbConfiguration(root);
-        propertiesReader.readPropertiesFromFile();
+        final List<String> lines = Collections.singletonList("tags:;;;;;;");
+        final InfluxDbConfiguration propertiesReader = getConfig(lines);
 
         final Map<String, String> tags = propertiesReader.getTags();
-
         assertEquals(0, tags.size());
     }
 
     @Test
     public void tags_has_only_a_key() throws IOException {
 
-        final List<String> lines = Collections.singletonList(
-                "tags:okay");
-        Files.write(file.toPath(), lines, Charset.forName("UTF-8"));
-
-        final InfluxDbConfiguration propertiesReader = new InfluxDbConfiguration(root);
-        propertiesReader.readPropertiesFromFile();
+        final List<String> lines = Collections.singletonList("tags:okay");
+        final InfluxDbConfiguration propertiesReader = getConfig(lines);
 
         final Map<String, String> tags = propertiesReader.getTags();
-
         assertEquals(0, tags.size());
     }
 
     @Test
     public void tags_has_correct_tag_but_missing_semicolon() throws IOException {
 
-        final List<String> lines = Collections.singletonList(
-                "tags:key=value");
-        Files.write(file.toPath(), lines, Charset.forName("UTF-8"));
-
-        final InfluxDbConfiguration propertiesReader = new InfluxDbConfiguration(root);
-        propertiesReader.readPropertiesFromFile();
+        final List<String> lines = Collections.singletonList("tags:key=value");
+        final InfluxDbConfiguration propertiesReader = getConfig(lines);
 
         final Map<String, String> tags = propertiesReader.getTags();
-
         assertEquals(1, tags.size());
     }
 
@@ -284,10 +214,7 @@ public class InfluxDbConfigurationTest {
 
         final List<String> lines = Arrays.asList("host:test",
                 "port:800000", "reportingInterval:0", "connectTimeout:-1");
-        Files.write(file.toPath(), lines, Charset.forName("UTF-8"));
-
-        final InfluxDbConfiguration propertiesReader = new InfluxDbConfiguration(root);
-        propertiesReader.readPropertiesFromFile();
+        final InfluxDbConfiguration propertiesReader = getConfig(lines);
 
         //false because port is out of range
         assertFalse(propertiesReader.validateConfiguration());
@@ -299,44 +226,58 @@ public class InfluxDbConfigurationTest {
 
     @Test
     public void validateConfiguration_cloud_token_missing() throws IOException {
-
         final List<String> lines = Arrays.asList("mode:cloud", "host:localhost", "bucket:mybucket");
-        Files.write(file.toPath(), lines, Charset.forName("UTF-8"));
-
-        final InfluxDbConfiguration propertiesReader = new InfluxDbConfiguration(root);
-
-        propertiesReader.readPropertiesFromFile();
-        final boolean validateConfiguration = propertiesReader.validateConfiguration();
-
-        assertFalse(validateConfiguration);
+        assertFalse(validateConfig(lines));
     }
 
     @Test
     public void validateConfiguration_cloud_bucket_missing() throws IOException {
-
         final List<String> lines = Arrays.asList("mode:cloud", "host:localhost", "token:mytoken");
-        Files.write(file.toPath(), lines, Charset.forName("UTF-8"));
-
-        final InfluxDbConfiguration propertiesReader = new InfluxDbConfiguration(root);
-
-        propertiesReader.readPropertiesFromFile();
-        final boolean validateConfiguration = propertiesReader.validateConfiguration();
-
-        assertFalse(validateConfiguration);
+        assertFalse(validateConfig(lines));
     }
 
     @Test
     public void validateConfiguration_cloud_ok() throws IOException {
-
         final List<String> lines = Arrays.asList("mode:cloud", "host:localhost", "token:mytoken", "bucket:mybucket");
-        Files.write(file.toPath(), lines, Charset.forName("UTF-8"));
-
-        final InfluxDbConfiguration propertiesReader = new InfluxDbConfiguration(root);
-
-        propertiesReader.readPropertiesFromFile();
-        final boolean validateConfiguration = propertiesReader.validateConfiguration();
-
-        assertFalse(validateConfiguration);
+        assertFalse(validateConfig(lines));
     }
 
+    @Test
+    public void retrieveFilteredReportingInterval_ok() throws IOException {
+        final List<String> lines = Arrays.asList("filteredReportingInterval: 42");
+        InfluxDbConfiguration conf = getConfig(lines);
+        assertEquals(42, conf.getFilteredReportingInterval());
+    }
+
+    @Test
+    public void retrieveConsoleDebug_ok() throws IOException {
+        final List<String> lines = Arrays.asList("consoleDebug: true");
+        InfluxDbConfiguration conf = getConfig(lines);
+        assertTrue(conf.consoleDebugging());
+    }
+
+    @Test
+    public void retrieveMetricsFilter_ok() throws IOException {
+        final List<String> lines = Arrays.asList("metricsFilterList: com.hivemq");
+        InfluxDbConfiguration conf = getConfig(lines);
+        assertEquals("com.hivemq", conf.getMetricFilter());
+    }
+
+    @Test
+    public void retrieveMetricsFilter_more_entries_ok() throws IOException {
+        final List<String> lines = Arrays.asList("metricsFilterList: com.hivemq; com.hivemq.messages; com.hivemq.cache");
+        InfluxDbConfiguration conf = getConfig(lines);
+        assertEquals("com.hivemq; com.hivemq.messages; com.hivemq.cache", conf.getMetricFilter());
+    }
+
+    private boolean validateConfig(List<String> lines) throws IOException {
+        return getConfig(lines).validateConfiguration();
+    }
+
+    private InfluxDbConfiguration getConfig(List<String> lines) throws IOException {
+        Files.write(file.toPath(), lines, StandardCharsets.UTF_8);
+        final InfluxDbConfiguration ret = new InfluxDbConfiguration(root);
+        ret.readPropertiesFromFile();
+        return ret;
+    }
 }

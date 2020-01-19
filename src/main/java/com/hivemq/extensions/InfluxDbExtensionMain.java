@@ -15,6 +15,7 @@
  */
 package com.hivemq.extensions;
 
+import com.codahale.metrics.ConsoleReporter;
 import com.codahale.metrics.MetricFilter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.ScheduledReporter;
@@ -34,7 +35,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -45,13 +45,18 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class InfluxDbExtensionMain implements ExtensionMain {
 
     private static final Logger log = LoggerFactory.getLogger(InfluxDbExtensionMain.class);
-    private static final HashSet<String> METER_FIELDS = Sets.newHashSet("count", "m1_rate", "m5_rate", "m15_rate", "mean_rate");
-    private static final HashSet<String> TIMER_FIELDS = Sets.newHashSet("count", "min", "max", "mean", "stddev", "p50", "p75", "p95", "p98", "p99", "p999", "m1_rate", "m5_rate", "m15_rate", "mean_rate");
+    private static final HashSet<String> METER_FIELDS =
+        Sets.newHashSet("count", "m1_rate", "m5_rate", "m15_rate", "mean_rate");
+    private static final HashSet<String> TIMER_FIELDS =
+        Sets.newHashSet("count", "min", "max", "mean", "stddev", "p50", "p75", "p95", "p98", "p99", "p999", "m1_rate",
+                         "m5_rate", "m15_rate", "mean_rate");
 
     private ScheduledReporter reporter;
+    private ScheduledReporter filteredReporter;
 
     @Override
-    public void extensionStart(@NotNull final ExtensionStartInput extensionStartInput, @NotNull final ExtensionStartOutput extensionStartOutput) {
+    public void extensionStart(@NotNull final ExtensionStartInput extensionStartInput,
+                               @NotNull final ExtensionStartOutput extensionStartOutput) {
 
         try {
             final File extensionHomeFolder = extensionStartInput.getExtensionInformation().getExtensionHomeFolder();
@@ -74,9 +79,16 @@ public class InfluxDbExtensionMain implements ExtensionMain {
                 return;
             }
 
-            final MetricRegistry metricRegistry = Services.metricRegistry();
-            reporter = setupReporter(metricRegistry, sender, configuration);
+            final MetricRegistryService registryService =
+                  new MetricRegistryService(configuration, Services.metricRegistry());
+
+            if (registryService.isFilteredRegistryConfigured()) {
+                filteredReporter = setupReporter(registryService.getFiltered(), sender, configuration);
+                filteredReporter.start(configuration.getFilteredReportingInterval(), TimeUnit.SECONDS);
+            }
+            reporter = setupReporter(registryService.getRemaining(), sender, configuration);
             reporter.start(configuration.getReportingInterval(), TimeUnit.SECONDS);
+
         } catch (Exception e) {
             log.warn("Start failed because of", e);
             extensionStartOutput.preventExtensionStartup("Start failed because of an exception");
@@ -84,30 +96,54 @@ public class InfluxDbExtensionMain implements ExtensionMain {
     }
 
     @Override
-    public void extensionStop(@NotNull final ExtensionStopInput extensionStopInput, @NotNull final ExtensionStopOutput extensionStopOutput) {
+    public void extensionStop(@NotNull final ExtensionStopInput extensionStopInput,
+                              @NotNull final ExtensionStopOutput extensionStopOutput) {
         if (reporter != null) {
             reporter.stop();
+        }
+
+        if (filteredReporter != null) {
+            filteredReporter.stop();
         }
     }
 
     @NotNull
-    private ScheduledReporter setupReporter(@NotNull final MetricRegistry metricRegistry, @NotNull final InfluxDbSender sender, @NotNull final InfluxDbConfiguration configuration) {
+    private ScheduledReporter setupReporter(@NotNull final MetricRegistry metricRegistry,
+                                            @NotNull final InfluxDbSender sender,
+                                            @NotNull final InfluxDbConfiguration configuration) {
+        if (configuration.consoleDebugging()) {
+            return setupConsoleReporter(metricRegistry);
+        } else {
+            return setupInfluxReporter(metricRegistry, sender, configuration);
+        }
+    }
+
+    @NotNull
+    private ScheduledReporter setupInfluxReporter(@NotNull final MetricRegistry metricRegistry,
+                                                  @NotNull final InfluxDbSender sender,
+                                                  @NotNull final InfluxDbConfiguration configuration) {
         checkNotNull(metricRegistry, "MetricRegistry for influxdb must not be null");
         checkNotNull(sender, "InfluxDbSender for influxdb must not be null");
         checkNotNull(configuration, "Configuration for influxdb must not be null");
-
-        final Map<String, String> tags = configuration.getTags();
-
         return InfluxDbReporter.forRegistry(metricRegistry)
-                .withTags(tags)
-                .convertRatesTo(TimeUnit.SECONDS)
-                .convertDurationsTo(TimeUnit.MILLISECONDS)
-                .filter(MetricFilter.ALL)
-                .groupGauges(false)
-                .skipIdleMetrics(false)
-                .includeMeterFields(METER_FIELDS)
-                .includeTimerFields(TIMER_FIELDS)
-                .build(sender);
+            .withTags(configuration.getTags())
+            .convertRatesTo(TimeUnit.SECONDS)
+            .convertDurationsTo(TimeUnit.MILLISECONDS)
+            .filter(MetricFilter.ALL)
+            .groupGauges(false)
+            .skipIdleMetrics(false)
+            .includeMeterFields(METER_FIELDS)
+            .includeTimerFields(TIMER_FIELDS)
+            .build(sender);
+    }
+
+    @NotNull
+    private ScheduledReporter setupConsoleReporter(@NotNull final MetricRegistry metricRegistry) {
+        return ConsoleReporter.forRegistry(metricRegistry)
+            .convertRatesTo(TimeUnit.SECONDS)
+            .convertDurationsTo(TimeUnit.MILLISECONDS)
+            .filter(MetricFilter.ALL)
+            .build();
     }
 
     @Nullable
