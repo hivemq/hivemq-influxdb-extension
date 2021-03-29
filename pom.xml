@@ -184,7 +184,7 @@
                                     <goal>hivemq</goal>
                                 </goals>
                                 <configuration>
-                                    <hiveMQDir><!-- YOUR_HIVEMQ_HOME_FOLDER --></hiveMQDir>
+                                    <hiveMQDir>/Users/ahelmbre/hivemq/hivemq-4.5.1</hiveMQDir>
                                     <debugMode>SERVER</debugMode>
                                 </configuration>
                             </execution>
