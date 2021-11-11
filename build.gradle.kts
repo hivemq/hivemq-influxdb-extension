@@ -13,7 +13,7 @@ hivemqExtension {
     author.set("HiveMQ")
     priority.set(1000)
     startPriority.set(1000)
-    mainClass.set("$group.InfluxDbExtensionMain") // TODO influxdb package
+    mainClass.set("$group.influxdb.InfluxDbExtensionMain")
     sdkVersion.set("${property("hivemq-extension-sdk.version")}")
 }
 

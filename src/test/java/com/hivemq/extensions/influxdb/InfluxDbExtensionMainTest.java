@@ -1,4 +1,4 @@
-package com.hivemq.extensions;
+package com.hivemq.extensions.influxdb;
 
 import com.hivemq.extension.sdk.api.parameter.ExtensionInformation;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStartInput;
