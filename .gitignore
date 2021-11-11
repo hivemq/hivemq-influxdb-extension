@@ -1,6 +1,14 @@
-.idea
-target/
-dependency-reduced-pom.xml
+# Gradle
+.gradle
+build/
+
+# IntelliJ
+out/
+*.iml
+.idea/*
+!.idea/codeStyles
+!.idea/inspectionProfiles
+!.idea/runConfigurations
+
+.java-version
 .DS_Store
-src/main/.DS_Store
-/.idea/dictionaries/

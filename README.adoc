@@ -94,5 +94,5 @@ If you want to contribute to HiveMQ InfluxDB Extension, see the link:CONTRIBUTIN
 
 = License
 
-HiveMQ InfluxDB Extension is licensed under the `APACHE LICENSE, VERSION 2.0`. A copy of the license can be found link:LICENSE.txt[here].
+HiveMQ InfluxDB Extension is licensed under the `APACHE LICENSE, VERSION 2.0`. A copy of the license can be found link:LICENSE[here].
 
