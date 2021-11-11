@@ -1,4 +1,4 @@
-package com.hivemq.extensions.configuration;
+package com.hivemq.extensions.influxdb.configuration;
 
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import org.junit.Before;

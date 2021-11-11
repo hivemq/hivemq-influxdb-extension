@@ -1,4 +1,4 @@
-package com.hivemq.extensions.configuration;
+package com.hivemq.extensions.influxdb.configuration;
 
 import org.junit.Rule;
 import org.junit.Test;
