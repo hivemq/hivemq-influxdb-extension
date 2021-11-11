@@ -1,104 +1,52 @@
 package com.hivemq.extensions.influxdb;
 
+import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.parameter.ExtensionInformation;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStartInput;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStartOutput;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.file.Files;
-import java.util.Arrays;
+import java.nio.file.Path;
 import java.util.List;
 
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
 
-public class InfluxDbExtensionMainTest {
+class InfluxDbExtensionMainTest {
 
-    @Rule
-    public TemporaryFolder folder = new TemporaryFolder();
+    private @NotNull InfluxDbExtensionMain main;
+    private @NotNull ExtensionStartInput extensionStartInput;
+    private @NotNull ExtensionStartOutput extensionStartOutput;
+    private @NotNull Path file;
 
-    @Mock
-    ExtensionStartInput extensionStartInput;
+    @BeforeEach
+    void setUp(final @TempDir @NotNull Path tempDir) {
+        main = new InfluxDbExtensionMain();
 
-    @Mock
-    ExtensionStartOutput extensionStartOutput;
+        extensionStartInput = mock(ExtensionStartInput.class);
+        extensionStartOutput = mock(ExtensionStartOutput.class);
+        final ExtensionInformation extensionInformation = mock(ExtensionInformation.class);
+        when(extensionStartInput.getExtensionInformation()).thenReturn(extensionInformation);
+        when(extensionStartInput.getExtensionInformation().getExtensionHomeFolder()).thenReturn(tempDir.toFile());
 
-    @Mock
-    ExtensionInformation extensionInformation;
-
-    private File root;
-
-    private File file;
-
-    @Before
-    public void set_up() throws IOException {
-        MockitoAnnotations.initMocks(this);
-
-        root = folder.getRoot();
-        String fileName = "influxdb.properties";
-        file = folder.newFile(fileName);
+        file = tempDir.resolve("influxdb.properties");
     }
 
-
     @Test
-    public void extensionStart_failed_no_configuration_file() {
-        file.delete();
-
-        final InfluxDbExtensionMain main = new InfluxDbExtensionMain();
-        when(extensionStartInput.getExtensionInformation()).thenReturn(extensionInformation);
-        when(extensionStartInput.getExtensionInformation().getExtensionHomeFolder()).thenReturn(root);
-
-
+    void extensionStart_whenNoConfigurationFile_thenPreventStartup() {
         main.extensionStart(extensionStartInput, extensionStartOutput);
-
         verify(extensionStartOutput).preventExtensionStartup(anyString());
     }
 
     @Test
-    public void extensionStart_failed_configuration_file_not_valid() throws IOException {
-
-        final List<String> lines = Arrays.asList("host:localhost", "port:-3000");
-        Files.write(file.toPath(), lines, Charset.forName("UTF-8"));
-
-        final InfluxDbExtensionMain main = new InfluxDbExtensionMain();
-        when(extensionStartInput.getExtensionInformation()).thenReturn(extensionInformation);
-        when(extensionStartInput.getExtensionInformation().getExtensionHomeFolder()).thenReturn(root);
-
+    void extensionStart_whenConfigurationFileNotValid_thenPreventStartup() throws IOException {
+        Files.write(file, List.of("host:localhost", "port:-3000"));
 
         main.extensionStart(extensionStartInput, extensionStartOutput);
-
         verify(extensionStartOutput).preventExtensionStartup(anyString());
-    }
-
-    @Ignore
-    @Test
-    public void extensionStart_failed_configuration_file_valid() throws IOException {
-
-        final List<String> lines = Arrays.asList("host:localhost", "port:3000");
-        Files.write(file.toPath(), lines, Charset.forName("UTF-8"));
-
-        final InfluxDbExtensionMain main = new InfluxDbExtensionMain();
-        when(extensionStartInput.getExtensionInformation()).thenReturn(extensionInformation);
-        when(extensionStartInput.getExtensionInformation().getExtensionHomeFolder()).thenReturn(root);
-
-
-        main.extensionStart(extensionStartInput, extensionStartOutput);
-
-        verify(extensionStartOutput, times(0));
-    }
-
-    @Test
-    public void extensionStop() {
     }
 }
