@@ -43,7 +43,8 @@ hivemqExtension.resources {
 /* ******************** test ******************** */
 
 dependencies {
-    testImplementation("junit:junit:${property("junit.version")}")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:${property("junit-jupiter.version")}")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
     testImplementation("org.mockito:mockito-core:${property("mockito.version")}")
     testImplementation("com.github.tomakehurst:wiremock-jre8-standalone:${property("wiremock.version")}")
 }
