@@ -1,34 +1,38 @@
-:hivemq-link: http://www.hivemq.com
+:hivemq-link: https://www.hivemq.com
 :influxdb-link: https://www.influxdata.com/time-series-platform/influxdb/
-:hivemq-support: http://www.hivemq.com/support/
+:hivemq-support: {hivemq-link}/support/
 :docker: https://www.docker.com/
 :influxdb-docker: https://hub.docker.com/_/influxdb/
 
-== InfluxDB Monitoring Extension for HiveMQ
+= HiveMQ InfluxDB Monitoring Extension
 
-*Extension Type:* Monitoring
+*Extension Type*: Monitoring
 
-*Version:* 4.1.0
+*Version*: 4.1.0
 
-*License:* Apache License 2.0
+*License*: Apache License 2.0
 
-=== Purpose
+== Purpose
 
-The HiveMQ {influxdb-link}[InfluxDB^] Extension can be leveraged to gather metrics from {hivemq-link}[HiveMQ^] and persist them into a time series database. This database can be used as the data source for a monitoring dashboard (like Grafana) that drills down into the inner workings of HiveMQ and provides valuable insights to your operations team.
+The HiveMQ {influxdb-link}[InfluxDB^] Extension can be leveraged to gather metrics from {hivemq-link}[HiveMQ^] and persist them into a time series database.
+This database can be used as the data source for a monitoring dashboard (like Grafana) that drills down into the inner workings of HiveMQ and provides valuable insights to your operations team.
 
-=== Installation
+== Installation
+
 Installing the extension for HiveMQ is very easy:
 
 . Unzip the downloaded zip file
-. In the folder `hivemq-influxdb-extension`, modify the `influxdb.properties` file to fit your needs. Check that the mandatory properties (host, port) are set
-. Copy the folder `hivemq-influxdb-extension` to your `[HIVEMQ_HOME]/extensions` folder
+. In the folder `hivemq-influxdb-extension`, modify the `influxdb.properties` file to fit your needs.
+  Check that the mandatory properties (host, port) are set
+. Copy the folder `hivemq-influxdb-extension` to your `<HIVEMQ_HOME>/extensions` folder
 . Done
 
+== Configuration
 
-=== Configuration
-The InfluxDB Monitoring extension uses its own configuration file `influxdb.properties`. The extension won't start if this file is missing or the required properties are not set.
+The InfluxDB Monitoring extension uses its own configuration file `influxdb.properties`.
+The extension won't start if this file is missing or the required properties are not set.
 
-==== General Configuration
+=== General Configuration
 
 |===
 | Config name | Required | Description | Default
@@ -48,7 +52,6 @@ The InfluxDB Monitoring extension uses its own configuration file `influxdb.prop
 
 |===
 
-
 .Example Configuration
 [source]
 ----
@@ -67,32 +70,37 @@ connectTimeout:5000
 tags:host=hivemq1
 ----
 
-=== First Steps
+== First Steps
 
-==== Quick Start InfluxDB
-If you don't already have an InfluxDB instance set up, here is a instruction how to start a not configured InfluxDB instance with Docker.
+=== Quick Start InfluxDB
+
+If you don't already have an InfluxDB instance set up, here is an instruction how to start a not configured InfluxDB instance with Docker.
 
 . Download and install {docker}[Docker^] for your platform
-. Start an InfluxDB docker container with the command `docker run -p 8086:8086 -v $PWD:/var/lib/influxdb influxdb`. For more information about using InfluxDB with Docker visit the {influxdb-docker}[official Docker repository^] for InfluxDB
+. Start an InfluxDB docker container with the command `docker run -p 8086:8086 -v $PWD:/var/lib/influxdb influxdb`.
+  For more information about using InfluxDB with Docker visit the {influxdb-docker}[official Docker repository^] for InfluxDB
 . A local instance of InfluxDB should be running with the port for the database set to 8086
-. Create a database that matches the name set in the property `database` in `influxdb.properties`. For the default `database` value use the command `curl -G http://localhost:8086/query --data-urlencode "q=CREATE DATABASE hivemq"`
+. Create a database that matches the name set in the property `database` in `influxdb.properties`.
+  For the default `database` value use the command `curl -G http://localhost:8086/query --data-urlencode "q=CREATE DATABASE hivemq"`
 . Done
 
-==== Usage
+=== Usage
+
 After the extension is installed and an InfluxDB instance exists.
 
 . Start HiveMQ
 . Extension successfully started if configuration file exists and contains required properties
 
-==== Need help?
+== Need Help?
 
-If you encounter any problems, we are happy to help. The best place to get in contact is our {hivemq-support}[support^].
+If you encounter any problems, we are happy to help.
+The best place to get in contact is our {hivemq-support}[support^].
 
-= Contributing
+== Contributing
 
 If you want to contribute to HiveMQ InfluxDB Extension, see the link:CONTRIBUTING.md[contribution guidelines].
 
-= License
+== License
 
-HiveMQ InfluxDB Extension is licensed under the `APACHE LICENSE, VERSION 2.0`. A copy of the license can be found link:LICENSE[here].
-
+HiveMQ InfluxDB Extension is licensed under the `APACHE LICENSE, VERSION 2.0`.
+A copy of the license can be found link:LICENSE[here].
