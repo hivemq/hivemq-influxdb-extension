@@ -47,5 +47,4 @@ class InfluxDbCloudSenderTest {
                 .withHeader("Authorization", equalTo("Token token"))
                 .withRequestBody(equalTo("line=line")));
     }
-
 }
