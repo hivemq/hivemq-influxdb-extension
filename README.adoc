@@ -7,9 +7,9 @@
 = HiveMQ InfluxDB Monitoring Extension
 
 image:https://img.shields.io/badge/Extension_Type-Monitoring-orange?style=for-the-badge[Extension Type]
-image:https://img.shields.io/github/v/release/hivemq/hivemq-influxdb-extension?style=for-the-badge[GitHub release (latest by date), link=https://github.com/hivemq/hivemq-influxdb-extension/releases/latest]
-image:https://img.shields.io/github/license/hivemq/hivemq-influxdb-extension?style=for-the-badge&color=brightgreen[GitHub, link=LICENSE]
-image:https://img.shields.io/github/workflow/status/hivemq/hivemq-influxdb-extension/CI%20Check/master?style=for-the-badge[GitHub Workflow Status (branch), link=https://github.com/hivemq/hivemq-influxdb-extension/actions/workflows/check.yml?query=branch%3Amaster]
+image:https://img.shields.io/github/v/release/hivemq/hivemq-influxdb-extension?style=for-the-badge[GitHub release (latest by date),link=https://github.com/hivemq/hivemq-influxdb-extension/releases/latest]
+image:https://img.shields.io/github/license/hivemq/hivemq-influxdb-extension?style=for-the-badge&color=brightgreen[GitHub,link=LICENSE]
+image:https://img.shields.io/github/workflow/status/hivemq/hivemq-influxdb-extension/CI%20Check/master?style=for-the-badge[GitHub Workflow Status (branch),link=https://github.com/hivemq/hivemq-influxdb-extension/actions/workflows/check.yml?query=branch%3Amaster]
 
 == Purpose
 
@@ -22,7 +22,7 @@ Installing the extension for HiveMQ is very easy:
 
 . Unzip the downloaded zip file
 . In the folder `hivemq-influxdb-extension`, modify the `influxdb.properties` file to fit your needs.
-  Check that the mandatory properties (host, port) are set
+Check that the mandatory properties (host, port) are set
 . Copy the folder `hivemq-influxdb-extension` to your `<HIVEMQ_HOME>/extensions` folder
 . Done
 
@@ -36,16 +36,19 @@ The extension won't start if this file is missing or the required properties are
 |===
 | Config name | Required | Description | Default
 
-| mode | no | The mode configured for the InfluxDB sender. Possibilities are: http, tcp, udp, cloud | http
+| mode | no | The mode configured for the InfluxDB sender.
+Possibilities are: http, tcp, udp, cloud | http
 | host | yes | The host name of the InfluxDB instance. | -
 | port | yes | The port number the InfluxDB instance is listening. | 8086
 | protocol | no | The protocol the InfluxDB sender uses in http mode. | http
-| auth | no | The authorization string to be used to connect to InfluxDB, of format username:password. If mode "cloud" is used, the token must be passed here| -
+| auth | no | The authorization string to be used to connect to InfluxDB, of format username:password.
+If mode "cloud" is used, the token must be passed here| -
 | prefix | no | The measurement prefix. | -
 | database | no | The database name. | hivemq
 | reportingInterval | no | The reporting interval in seconds. | 1
 | connectTimeout | no | The connect and read timeout in seconds. | 5000
-| tags | no | The tags for each metric. Listed as a semicolon ( `;` ) separated list. | -
+| tags | no | The tags for each metric.
+Listed as a semicolon ( `;` ) separated list. | -
 | organization | only for mode: "cloud" | The organization to push data to | -
 | bucket | only for mode: "cloud" | The bucket to push data to | -
 
@@ -77,10 +80,10 @@ If you don't already have an InfluxDB instance set up, here is an instruction ho
 
 . Download and install {docker}[Docker^] for your platform
 . Start an InfluxDB docker container with the command `docker run -p 8086:8086 -v $PWD:/var/lib/influxdb influxdb`.
-  For more information about using InfluxDB with Docker visit the {influxdb-docker}[official Docker repository^] for InfluxDB
+For more information about using InfluxDB with Docker visit the {influxdb-docker}[official Docker repository^] for InfluxDB
 . A local instance of InfluxDB should be running with the port for the database set to 8086
 . Create a database that matches the name set in the property `database` in `influxdb.properties`.
-  For the default `database` value use the command `curl -G http://localhost:8086/query --data-urlencode "q=CREATE DATABASE hivemq"`
+For the default `database` value use the command `curl -G http://localhost:8086/query --data-urlencode "q=CREATE DATABASE hivemq"`
 . Done
 
 === Usage
