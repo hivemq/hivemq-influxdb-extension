@@ -146,7 +146,7 @@ public class InfluxDbExtensionMain implements ExtensionMain {
                     log.info("Creating InfluxDB Cloud sender for endpoint {}, bucket {}, organization {}", host, bucket, organization);
                     checkNotNull(bucket, "Bucket name must be defined in cloud mode");
                     checkNotNull(organization, "Organization must be defined in cloud mode");
-                    sender = new InfluxDbCloudSender("https", host, port, auth, TimeUnit.SECONDS, connectTimeout, connectTimeout, prefix, organization, bucket);
+                    sender = new InfluxDbCloudSender(protocol, host, port, auth, TimeUnit.SECONDS, connectTimeout, connectTimeout, prefix, organization, bucket);
                     break;
 
             }
