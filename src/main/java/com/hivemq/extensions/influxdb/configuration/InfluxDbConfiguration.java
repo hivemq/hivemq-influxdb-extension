@@ -44,7 +44,6 @@ public class InfluxDbConfiguration extends PropertiesReader {
     private static final String MODE = "mode";
     private static final String MODE_DEFAULT = "http";
     private static final String PROTOCOL = "protocol";
-    private static final String PROTOCOL_DEFAULT = "http";
     private static final String REPORTING_INTERVAL = "reportingInterval";
     private static final int REPORTING_INTERVAL_DEFAULT = 1;
     private static final String PREFIX = "prefix";
@@ -77,7 +76,7 @@ public class InfluxDbConfiguration extends PropertiesReader {
         countError += checkMandatoryProperty(HOST);
         countError += checkMandatoryProperty(PORT);
 
-        if (countError != 0){
+        if (countError != 0) {
             return false;
         }
 
@@ -164,13 +163,11 @@ public class InfluxDbConfiguration extends PropertiesReader {
     }
 
     @NotNull
-    public String getProtocol() {
+    public String getProtocolOrDefault(final @NotNull String defaultProtocol) {
         final String protocol = getProperty(PROTOCOL);
         if (protocol == null) {
-            if (getMode().equals("http")) {
-                log.warn("No protocol configured for InfluxDb, using default: {}", PROTOCOL_DEFAULT);
-                return PROTOCOL_DEFAULT;
-            }
+            log.warn("No protocol configured for InfluxDb in mode '{}', using default: '{}'", getMode(), defaultProtocol);
+            return defaultProtocol;
         }
         return protocol;
     }
