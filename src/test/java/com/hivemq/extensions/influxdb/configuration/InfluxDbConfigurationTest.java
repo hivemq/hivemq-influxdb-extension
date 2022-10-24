@@ -111,7 +111,7 @@ class InfluxDbConfigurationTest {
         assertEquals("http", influxDbConfiguration.getMode());
         assertTrue(influxDbConfiguration.getTags().isEmpty());
         assertEquals("", influxDbConfiguration.getPrefix());
-        assertEquals("http", influxDbConfiguration.getProtocol());
+        assertEquals("http", influxDbConfiguration.getProtocolOrDefault("http"));
         assertEquals("hivemq", influxDbConfiguration.getDatabase());
         assertEquals(5000, influxDbConfiguration.getConnectTimeout());
         assertEquals(1, influxDbConfiguration.getReportingInterval());
@@ -130,7 +130,7 @@ class InfluxDbConfigurationTest {
         assertEquals("http", influxDbConfiguration.getMode());
         assertTrue(influxDbConfiguration.getTags().isEmpty());
         assertEquals("", influxDbConfiguration.getPrefix());
-        assertEquals("http", influxDbConfiguration.getProtocol());
+        assertEquals("http", influxDbConfiguration.getProtocolOrDefault("http"));
         assertEquals("hivemq", influxDbConfiguration.getDatabase());
         assertEquals(5000, influxDbConfiguration.getConnectTimeout());
         assertEquals(1, influxDbConfiguration.getReportingInterval());
@@ -162,7 +162,7 @@ class InfluxDbConfigurationTest {
         assertEquals("hivemq1", tags.get("host"));
         assertEquals("3.4.1", tags.get("version"));
         assertEquals("node1", influxDbConfiguration.getPrefix());
-        assertEquals("tcp", influxDbConfiguration.getProtocol());
+        assertEquals("tcp", influxDbConfiguration.getProtocolOrDefault("default"));
         assertEquals("test-hivemq", influxDbConfiguration.getDatabase());
         assertEquals(10000, influxDbConfiguration.getConnectTimeout());
         assertEquals(5, influxDbConfiguration.getReportingInterval());

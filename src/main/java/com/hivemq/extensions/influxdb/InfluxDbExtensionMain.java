@@ -116,7 +116,6 @@ public class InfluxDbExtensionMain implements ExtensionMain {
 
         final String host = configuration.getHost();
         final int port = configuration.getPort();
-        final String protocol = configuration.getProtocol();
         final String database = configuration.getDatabase();
         final String auth = configuration.getAuth();
         final int connectTimeout = configuration.getConnectTimeout();
@@ -132,7 +131,7 @@ public class InfluxDbExtensionMain implements ExtensionMain {
             switch (configuration.getMode()) {
                 case "http":
                     log.info("Creating InfluxDB HTTP sender for server {}:{} and database {}", host, port, database);
-                    sender = new InfluxDbHttpSender(protocol, host, port, database, auth, TimeUnit.SECONDS, connectTimeout, connectTimeout, prefix);
+                    sender = new InfluxDbHttpSender(configuration.getProtocolOrDefault("http"), host, port, database, auth, TimeUnit.SECONDS, connectTimeout, connectTimeout, prefix);
                     break;
                 case "tcp":
                     log.info("Creating InfluxDB TCP sender for server {}:{} and database {}", host, port, database);
@@ -146,7 +145,7 @@ public class InfluxDbExtensionMain implements ExtensionMain {
                     log.info("Creating InfluxDB Cloud sender for endpoint {}, bucket {}, organization {}", host, bucket, organization);
                     checkNotNull(bucket, "Bucket name must be defined in cloud mode");
                     checkNotNull(organization, "Organization must be defined in cloud mode");
-                    sender = new InfluxDbCloudSender(protocol, host, port, auth, TimeUnit.SECONDS, connectTimeout, connectTimeout, prefix, organization, bucket);
+                    sender = new InfluxDbCloudSender(configuration.getProtocolOrDefault("https"), host, port, auth, TimeUnit.SECONDS, connectTimeout, connectTimeout, prefix, organization, bucket);
                     break;
 
             }
