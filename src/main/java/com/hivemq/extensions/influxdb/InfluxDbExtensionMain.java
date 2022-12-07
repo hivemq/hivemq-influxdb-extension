@@ -19,7 +19,6 @@ import com.codahale.metrics.MetricFilter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.ScheduledReporter;
 import com.google.common.collect.Sets;
-import com.hivemq.extensions.influxdb.configuration.InfluxDbConfiguration;
 import com.hivemq.extension.sdk.api.ExtensionMain;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.hivemq.extension.sdk.api.annotations.Nullable;
@@ -28,7 +27,12 @@ import com.hivemq.extension.sdk.api.parameter.ExtensionStartOutput;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStopInput;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStopOutput;
 import com.hivemq.extension.sdk.api.services.Services;
-import com.izettle.metrics.influxdb.*;
+import com.hivemq.extensions.influxdb.configuration.InfluxDbConfiguration;
+import com.izettle.metrics.influxdb.InfluxDbHttpSender;
+import com.izettle.metrics.influxdb.InfluxDbReporter;
+import com.izettle.metrics.influxdb.InfluxDbSender;
+import com.izettle.metrics.influxdb.InfluxDbTcpSender;
+import com.izettle.metrics.influxdb.InfluxDbUdpSender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,13 +49,30 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class InfluxDbExtensionMain implements ExtensionMain {
 
     private static final Logger log = LoggerFactory.getLogger(InfluxDbExtensionMain.class);
-    private static final HashSet<String> METER_FIELDS = Sets.newHashSet("count", "m1_rate", "m5_rate", "m15_rate", "mean_rate");
-    private static final HashSet<String> TIMER_FIELDS = Sets.newHashSet("count", "min", "max", "mean", "stddev", "p50", "p75", "p95", "p98", "p99", "p999", "m1_rate", "m5_rate", "m15_rate", "mean_rate");
+    private static final HashSet<String> METER_FIELDS =
+            Sets.newHashSet("count", "m1_rate", "m5_rate", "m15_rate", "mean_rate");
+    private static final HashSet<String> TIMER_FIELDS = Sets.newHashSet("count",
+            "min",
+            "max",
+            "mean",
+            "stddev",
+            "p50",
+            "p75",
+            "p95",
+            "p98",
+            "p99",
+            "p999",
+            "m1_rate",
+            "m5_rate",
+            "m15_rate",
+            "mean_rate");
 
     private ScheduledReporter reporter;
 
     @Override
-    public void extensionStart(@NotNull final ExtensionStartInput extensionStartInput, @NotNull final ExtensionStartOutput extensionStartOutput) {
+    public void extensionStart(
+            @NotNull final ExtensionStartInput extensionStartInput,
+            @NotNull final ExtensionStartOutput extensionStartOutput) {
 
         try {
             final File extensionHomeFolder = extensionStartInput.getExtensionInformation().getExtensionHomeFolder();
@@ -70,7 +91,8 @@ public class InfluxDbExtensionMain implements ExtensionMain {
             final InfluxDbSender sender = setupSender(configuration);
 
             if (sender == null) {
-                extensionStartOutput.preventExtensionStartup("Couldn't create an influxdb sender. Please check that the configuration is correct");
+                extensionStartOutput.preventExtensionStartup(
+                        "Couldn't create an influxdb sender. Please check that the configuration is correct");
                 return;
             }
 
@@ -84,14 +106,19 @@ public class InfluxDbExtensionMain implements ExtensionMain {
     }
 
     @Override
-    public void extensionStop(@NotNull final ExtensionStopInput extensionStopInput, @NotNull final ExtensionStopOutput extensionStopOutput) {
+    public void extensionStop(
+            @NotNull final ExtensionStopInput extensionStopInput,
+            @NotNull final ExtensionStopOutput extensionStopOutput) {
         if (reporter != null) {
             reporter.stop();
         }
     }
 
     @NotNull
-    private ScheduledReporter setupReporter(@NotNull final MetricRegistry metricRegistry, @NotNull final InfluxDbSender sender, @NotNull final InfluxDbConfiguration configuration) {
+    private ScheduledReporter setupReporter(
+            @NotNull final MetricRegistry metricRegistry,
+            @NotNull final InfluxDbSender sender,
+            @NotNull final InfluxDbConfiguration configuration) {
         checkNotNull(metricRegistry, "MetricRegistry for influxdb must not be null");
         checkNotNull(sender, "InfluxDbSender for influxdb must not be null");
         checkNotNull(configuration, "Configuration for influxdb must not be null");
@@ -131,7 +158,15 @@ public class InfluxDbExtensionMain implements ExtensionMain {
             switch (configuration.getMode()) {
                 case "http":
                     log.info("Creating InfluxDB HTTP sender for server {}:{} and database {}", host, port, database);
-                    sender = new InfluxDbHttpSender(configuration.getProtocolOrDefault("http"), host, port, database, auth, TimeUnit.SECONDS, connectTimeout, connectTimeout, prefix);
+                    sender = new InfluxDbHttpSender(configuration.getProtocolOrDefault("http"),
+                            host,
+                            port,
+                            database,
+                            auth,
+                            TimeUnit.SECONDS,
+                            connectTimeout,
+                            connectTimeout,
+                            prefix);
                     break;
                 case "tcp":
                     log.info("Creating InfluxDB TCP sender for server {}:{} and database {}", host, port, database);
@@ -142,10 +177,22 @@ public class InfluxDbExtensionMain implements ExtensionMain {
                     sender = new InfluxDbUdpSender(host, port, connectTimeout, database, prefix);
                     break;
                 case "cloud":
-                    log.info("Creating InfluxDB Cloud sender for endpoint {}, bucket {}, organization {}", host, bucket, organization);
+                    log.info("Creating InfluxDB Cloud sender for endpoint {}, bucket {}, organization {}",
+                            host,
+                            bucket,
+                            organization);
                     checkNotNull(bucket, "Bucket name must be defined in cloud mode");
                     checkNotNull(organization, "Organization must be defined in cloud mode");
-                    sender = new InfluxDbCloudSender(configuration.getProtocolOrDefault("https"), host, port, auth, TimeUnit.SECONDS, connectTimeout, connectTimeout, prefix, organization, bucket);
+                    sender = new InfluxDbCloudSender(configuration.getProtocolOrDefault("https"),
+                            host,
+                            port,
+                            auth,
+                            TimeUnit.SECONDS,
+                            connectTimeout,
+                            connectTimeout,
+                            prefix,
+                            organization,
+                            bucket);
                     break;
 
             }

@@ -68,10 +68,10 @@ public abstract class PropertiesReader {
      * Fetch a property with given key from {@link Properties}.
      *
      * @param key The name of the property to look for.
-     * @return The property for the value if it exists, <b>null</b> if key or {@link Properties} doesn't exist or the value is an empty string.
+     * @return The property for the value if it exists, <b>null</b> if key or {@link Properties} doesn't exist or the
+     *         value is an empty string.
      */
-    @Nullable
-    String getProperty(@NotNull final String key) {
+    @Nullable String getProperty(@NotNull final String key) {
         checkNotNull(key, "Key to fetch property for must not be null.");
 
         if (properties == null) {

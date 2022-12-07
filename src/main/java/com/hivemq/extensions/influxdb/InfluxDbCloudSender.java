@@ -38,10 +38,17 @@ public class InfluxDbCloudSender extends InfluxDbHttpSender {
     private final int readTimeout;
     private final URL url;
 
-    public InfluxDbCloudSender(String protocol, String host, int port,
-                               String authToken, TimeUnit timePrecision,
-                               int connectTimeout, int readTimeout, String measurementPrefix,
-                               final String organization, final String bucket) throws Exception {
+    public InfluxDbCloudSender(
+            String protocol,
+            String host,
+            int port,
+            String authToken,
+            TimeUnit timePrecision,
+            int connectTimeout,
+            int readTimeout,
+            String measurementPrefix,
+            final String organization,
+            final String bucket) throws Exception {
         super(protocol, host, port, "", authToken, timePrecision, connectTimeout, readTimeout, measurementPrefix);
         this.authToken = authToken;
         this.connectTimeout = connectTimeout;
@@ -64,7 +71,8 @@ public class InfluxDbCloudSender extends InfluxDbHttpSender {
         con.setReadTimeout(readTimeout);
         con.setRequestProperty("Content-Encoding", "gzip");
 
-        try (OutputStream out = con.getOutputStream(); final GZIPOutputStream gzipOutputStream = new GZIPOutputStream(out)) {
+        try (OutputStream out = con.getOutputStream();
+             final GZIPOutputStream gzipOutputStream = new GZIPOutputStream(out)) {
             gzipOutputStream.write(line);
             gzipOutputStream.flush();
             out.flush();
@@ -74,9 +82,13 @@ public class InfluxDbCloudSender extends InfluxDbHttpSender {
 
         // Check if non 2XX response code.
         if (responseCode / 100 != 2) {
-            throw new IOException(
-                    "Server returned HTTP response code: " + responseCode + " for URL: " + url + " with content :'"
-                            + con.getResponseMessage() + "'");
+            throw new IOException("Server returned HTTP response code: " +
+                    responseCode +
+                    " for URL: " +
+                    url +
+                    " with content :'" +
+                    con.getResponseMessage() +
+                    "'");
         }
         return responseCode;
     }

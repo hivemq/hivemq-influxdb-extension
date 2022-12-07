@@ -26,7 +26,10 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class InfluxDbConfigurationTest {
 
@@ -93,17 +96,17 @@ class InfluxDbConfigurationTest {
 
     @Test
     void all_properties_empty() throws IOException {
-        Files.write(file, List.of(
-                "mode:",
-                "host:",
-                "port:",
-                "tags:",
-                "prefix:",
-                "protocol:",
-                "database:",
-                "connectTimeout:",
-                "reportingInterval:",
-                "auth:"));
+        Files.write(file,
+                List.of("mode:",
+                        "host:",
+                        "port:",
+                        "tags:",
+                        "prefix:",
+                        "protocol:",
+                        "database:",
+                        "connectTimeout:",
+                        "reportingInterval:",
+                        "auth:"));
 
         assertTrue(influxDbConfiguration.readPropertiesFromFile());
         assertFalse(influxDbConfiguration.validateConfiguration());
@@ -141,17 +144,17 @@ class InfluxDbConfigurationTest {
 
     @Test
     void all_properties_have_correct_values() throws IOException {
-        Files.write(file, List.of(
-                "mode:tcp",
-                "host:hivemq.monitoring.com",
-                "port:3000",
-                "tags:host=hivemq1;version=3.4.1",
-                "prefix:node1",
-                "protocol:tcp",
-                "database:test-hivemq",
-                "connectTimeout:10000",
-                "reportingInterval:5",
-                "auth:username:password"));
+        Files.write(file,
+                List.of("mode:tcp",
+                        "host:hivemq.monitoring.com",
+                        "port:3000",
+                        "tags:host=hivemq1;version=3.4.1",
+                        "prefix:node1",
+                        "protocol:tcp",
+                        "database:test-hivemq",
+                        "connectTimeout:10000",
+                        "reportingInterval:5",
+                        "auth:username:password"));
 
         assertTrue(influxDbConfiguration.readPropertiesFromFile());
         assertTrue(influxDbConfiguration.validateConfiguration());

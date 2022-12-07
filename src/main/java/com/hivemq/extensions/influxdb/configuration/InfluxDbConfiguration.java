@@ -166,7 +166,9 @@ public class InfluxDbConfiguration extends PropertiesReader {
     public String getProtocolOrDefault(final @NotNull String defaultProtocol) {
         final String protocol = getProperty(PROTOCOL);
         if (protocol == null) {
-            log.warn("No protocol configured for InfluxDb in mode '{}', using default: '{}'", getMode(), defaultProtocol);
+            log.warn("No protocol configured for InfluxDb in mode '{}', using default: '{}'",
+                    getMode(),
+                    defaultProtocol);
             return defaultProtocol;
         }
         return protocol;
@@ -223,7 +225,8 @@ public class InfluxDbConfiguration extends PropertiesReader {
     }
 
     /**
-     * Fetch property with given <b>key</b>. If the fetched {@link String} is <b>null</b> the <b>defaultValue</b> will be returned.
+     * Fetch property with given <b>key</b>. If the fetched {@link String} is <b>null</b> the <b>defaultValue</b> will
+     * be returned.
      *
      * @param key          Key of the property.
      * @param defaultValue Default value as fallback, if property has no value.
@@ -248,7 +251,8 @@ public class InfluxDbConfiguration extends PropertiesReader {
 
     /**
      * Fetch property with given <b>key</b>.
-     * If the fetched {@link String} value is not <b>null</b> convert the value to an int and check validation constraints if given flags are <b>false</b> before returning the value.
+     * If the fetched {@link String} value is not <b>null</b> convert the value to an int and check validation
+     * constraints if given flags are <b>false</b> before returning the value.
      *
      * @param key             Key of the property
      * @param defaultValue    Default value as fallback, if property has no value
@@ -256,7 +260,11 @@ public class InfluxDbConfiguration extends PropertiesReader {
      * @param negativeAllowed use <b>true</b> is property can be negative int
      * @return the actual value of the property if it is set and valid, else the <b>defaultValue</b>
      */
-    private int validateIntProperty(@NotNull final String key, final int defaultValue, final boolean zeroAllowed, final boolean negativeAllowed) {
+    private int validateIntProperty(
+            @NotNull final String key,
+            final int defaultValue,
+            final boolean zeroAllowed,
+            final boolean negativeAllowed) {
         checkNotNull(key, "Key to fetch property must not be null");
 
         final String value = properties.getProperty(key);
@@ -271,7 +279,10 @@ public class InfluxDbConfiguration extends PropertiesReader {
         try {
             valueAsInt = Integer.parseInt(value);
         } catch (NumberFormatException e) {
-            log.warn("Value for InfluxDB property '{}' is not a number, original value {}. Using default: {}", key, value, defaultValue);
+            log.warn("Value for InfluxDB property '{}' is not a number, original value {}. Using default: {}",
+                    key,
+                    value,
+                    defaultValue);
             return defaultValue;
         }
 
