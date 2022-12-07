@@ -53,9 +53,28 @@ tasks.withType<Test>().configureEach {
     useJUnitPlatform()
 }
 
+/* ******************** integration test ******************** */
+
+dependencies {
+    integrationTestImplementation(platform("org.testcontainers:testcontainers-bom:${property("testcontainers.version")}"))
+
+    integrationTestImplementation("org.assertj:assertj-core:${property("assertj.version")}")
+    integrationTestImplementation("org.awaitility:awaitility:${property("awaitility.version")}")
+    integrationTestImplementation("com.hivemq:hivemq-mqtt-client:${property("hivemq-mqtt-client.version")}")
+    integrationTestImplementation("com.squareup.okhttp3:okhttp:${property("okhttp.version")}")
+    integrationTestImplementation("org.testcontainers:junit-jupiter")
+    integrationTestImplementation("org.testcontainers:influxdb")
+    integrationTestImplementation("org.testcontainers:hivemq")
+    integrationTestImplementation("org.influxdb:influxdb-java:${property("influxdb.version")}")
+
+    integrationTestRuntimeOnly("ch.qos.logback:logback-classic:${property("logback.version")}")
+}
+
 /* ******************** checks ******************** */
 
 license {
     header = rootDir.resolve("HEADER")
     mapping("java", "SLASHSTAR_STYLE")
+    exclude("**/template-s3discovery.properties")
+    exclude("**/logback-test.xml")
 }
