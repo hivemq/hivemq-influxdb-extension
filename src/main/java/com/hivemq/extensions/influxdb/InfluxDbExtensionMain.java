@@ -48,31 +48,22 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class InfluxDbExtensionMain implements ExtensionMain {
 
-    private static final Logger log = LoggerFactory.getLogger(InfluxDbExtensionMain.class);
-    private static final HashSet<String> METER_FIELDS =
+    private static final @NotNull Logger log = LoggerFactory.getLogger(InfluxDbExtensionMain.class);
+    private static final @NotNull HashSet<String> METER_FIELDS =
             Sets.newHashSet("count", "m1_rate", "m5_rate", "m15_rate", "mean_rate");
-    private static final HashSet<String> TIMER_FIELDS = Sets.newHashSet("count",
-            "min",
-            "max",
-            "mean",
-            "stddev",
-            "p50",
-            "p75",
-            "p95",
-            "p98",
-            "p99",
-            "p999",
+    private static final @NotNull HashSet<String> TIMER_FIELDS =
+            Sets.newHashSet("count", "min", "max", "mean", "stddev", "p50", "p75", "p95", "p98", "p99", "p999",
             "m1_rate",
             "m5_rate",
             "m15_rate",
             "mean_rate");
 
-    private ScheduledReporter reporter;
+    private @Nullable ScheduledReporter reporter;
 
     @Override
     public void extensionStart(
-            @NotNull final ExtensionStartInput extensionStartInput,
-            @NotNull final ExtensionStartOutput extensionStartOutput) {
+            final @NotNull ExtensionStartInput extensionStartInput,
+            final @NotNull ExtensionStartOutput extensionStartOutput) {
 
         try {
             final File extensionHomeFolder = extensionStartInput.getExtensionInformation().getExtensionHomeFolder();
@@ -107,18 +98,17 @@ public class InfluxDbExtensionMain implements ExtensionMain {
 
     @Override
     public void extensionStop(
-            @NotNull final ExtensionStopInput extensionStopInput,
-            @NotNull final ExtensionStopOutput extensionStopOutput) {
+            final @NotNull ExtensionStopInput extensionStopInput,
+            final @NotNull ExtensionStopOutput extensionStopOutput) {
         if (reporter != null) {
             reporter.stop();
         }
     }
 
-    @NotNull
-    private ScheduledReporter setupReporter(
-            @NotNull final MetricRegistry metricRegistry,
-            @NotNull final InfluxDbSender sender,
-            @NotNull final InfluxDbConfiguration configuration) {
+    private @NotNull ScheduledReporter setupReporter(
+            final @NotNull MetricRegistry metricRegistry,
+            final @NotNull InfluxDbSender sender,
+            final @NotNull InfluxDbConfiguration configuration) {
         checkNotNull(metricRegistry, "MetricRegistry for influxdb must not be null");
         checkNotNull(sender, "InfluxDbSender for influxdb must not be null");
         checkNotNull(configuration, "Configuration for influxdb must not be null");
@@ -137,8 +127,7 @@ public class InfluxDbExtensionMain implements ExtensionMain {
                 .build(sender);
     }
 
-    @Nullable
-    private InfluxDbSender setupSender(@NotNull final InfluxDbConfiguration configuration) {
+    private @Nullable InfluxDbSender setupSender(final @NotNull InfluxDbConfiguration configuration) {
         checkNotNull(configuration, "Configuration for influxdb must not be null");
 
         final String host = configuration.getHost();
@@ -185,18 +174,11 @@ public class InfluxDbExtensionMain implements ExtensionMain {
                     checkNotNull(organization, "Organization must be defined in cloud mode");
                     sender = new InfluxDbCloudSender(configuration.getProtocolOrDefault("https"),
                             host,
-                            port,
-                            auth,
-                            TimeUnit.SECONDS,
-                            connectTimeout,
-                            connectTimeout,
-                            prefix,
-                            organization,
-                            bucket);
+                            port, auth, TimeUnit.SECONDS, connectTimeout, connectTimeout, prefix, organization, bucket);
                     break;
 
             }
-        } catch (Exception ex) {
+        } catch (final Exception ex) {
             log.error("Not able to start InfluxDB sender, please check your configuration: {}", ex.getMessage());
             log.debug("Original Exception: ", ex);
         }

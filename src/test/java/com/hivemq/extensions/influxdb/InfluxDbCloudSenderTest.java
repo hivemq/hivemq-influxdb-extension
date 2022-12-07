@@ -36,7 +36,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 class InfluxDbCloudSenderTest {
 
     @RegisterExtension
-    final @NotNull WireMockExtension wireMockExtension = new WireMockExtension();
+    static final @NotNull WireMockExtension wireMockExtension = new WireMockExtension();
 
     @Test
     void test_write_data() throws Exception {
