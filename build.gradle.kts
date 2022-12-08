@@ -20,7 +20,6 @@ hivemqExtension {
 dependencies {
     implementation("com.izettle:metrics-influxdb:${property("metrics-influxdb.version")}")
     implementation("org.apache.commons:commons-lang3:${property("commons-lang3.version")}")
-//    implementation("com.google.collections:google-collections:${property("google-collections.version")}")
 }
 
 /* ******************** resources ******************** */
