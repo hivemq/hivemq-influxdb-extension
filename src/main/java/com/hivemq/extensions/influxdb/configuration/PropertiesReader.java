@@ -23,9 +23,8 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Objects;
 import java.util.Properties;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Load the content of a {@link File} into {@link Properties}.
@@ -40,7 +39,7 @@ public abstract class PropertiesReader {
     protected @Nullable Properties properties;
 
     PropertiesReader(final @NotNull File configFilePath) {
-        checkNotNull(configFilePath, "Path to config file must not be null");
+        Objects.requireNonNull(configFilePath, "Path to config file must not be null");
         this.configFilePath = configFilePath;
     }
 
@@ -71,7 +70,7 @@ public abstract class PropertiesReader {
      *         value is an empty string.
      */
     @Nullable String getProperty(final @NotNull String key) {
-        checkNotNull(key, "Key to fetch property for must not be null.");
+        Objects.requireNonNull(key, "Key to fetch property for must not be null.");
 
         if (properties == null) {
             return null;
@@ -93,7 +92,7 @@ public abstract class PropertiesReader {
      * @throws IOException If properties could not be read from <b>file</b>.
      */
     private void loadProperties(final @NotNull File file) throws IOException {
-        checkNotNull(file, "File that contains properties must not be null");
+        Objects.requireNonNull(file, "File that contains properties must not be null");
 
         try (final FileReader in = new FileReader(file)) {
             properties = new Properties();

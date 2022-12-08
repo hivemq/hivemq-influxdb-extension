@@ -20,7 +20,7 @@ hivemqExtension {
 dependencies {
     implementation("com.izettle:metrics-influxdb:${property("metrics-influxdb.version")}")
     implementation("org.apache.commons:commons-lang3:${property("commons-lang3.version")}")
-    implementation("com.google.collections:google-collections:${property("google-collections.version")}")
+//    implementation("com.google.collections:google-collections:${property("google-collections.version")}")
 }
 
 /* ******************** resources ******************** */
@@ -47,6 +47,8 @@ dependencies {
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
     testImplementation("org.mockito:mockito-core:${property("mockito.version")}")
     testImplementation("com.github.tomakehurst:wiremock-jre8:${property("wiremock.version")}")
+
+    testRuntimeOnly("ch.qos.logback:logback-classic:${property("logback.version")}")
 }
 
 tasks.withType<Test>().configureEach {
@@ -66,8 +68,6 @@ dependencies {
     integrationTestImplementation("org.testcontainers:influxdb")
     integrationTestImplementation("org.testcontainers:hivemq")
     integrationTestImplementation("org.influxdb:influxdb-java:${property("influxdb.version")}")
-
-    integrationTestRuntimeOnly("ch.qos.logback:logback-classic:${property("logback.version")}")
 }
 
 /* ******************** checks ******************** */

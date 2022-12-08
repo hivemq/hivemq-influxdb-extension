@@ -24,9 +24,8 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Reads a property file containing influxdb properties
@@ -112,7 +111,7 @@ public class InfluxDbConfiguration extends PropertiesReader {
      * @return 0 if property exists, else 1.
      */
     private int checkMandatoryProperty(final @NotNull String property) {
-        checkNotNull(property, "Mandatory property must not be null");
+        Objects.requireNonNull(property, "Mandatory property must not be null");
 
         final String value = getProperty(property);
 
@@ -219,8 +218,8 @@ public class InfluxDbConfiguration extends PropertiesReader {
      * @return the actual value of the property if it is set, else the <b>defaultValue</b>.
      */
     private String validateStringProperty(final @NotNull String key, final @NotNull String defaultValue) {
-        checkNotNull(key, "Key to fetch property must not be null");
-        checkNotNull(defaultValue, "Default value for property must not be null");
+        Objects.requireNonNull(key, "Key to fetch property must not be null");
+        Objects.requireNonNull(defaultValue, "Default value for property must not be null");
 
         final String value = getProperty(key);
 
@@ -246,7 +245,7 @@ public class InfluxDbConfiguration extends PropertiesReader {
      */
     private int validateIntProperty(
             final @NotNull String key, final int defaultValue) {
-        checkNotNull(key, "Key to fetch property must not be null");
+        Objects.requireNonNull(key, "Key to fetch property must not be null");
 
         final String value = properties.getProperty(key);
 
