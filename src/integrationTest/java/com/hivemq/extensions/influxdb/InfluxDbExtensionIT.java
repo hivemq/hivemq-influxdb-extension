@@ -56,7 +56,7 @@ public class InfluxDbExtensionIT {
             .withFileInExtensionHomeFolder(MountableFile.forClasspathResource("influxdb.properties"),
                     "hivemq-influxdb-extension",
                     "influxdb.properties")
-            .withLogConsumer(outputFrame -> System.out.print(outputFrame.getUtf8String()));
+            .withLogConsumer(outputFrame -> System.out.print("HIVEMQ: " + outputFrame.getUtf8String()));
 
     @Container
     private final @NotNull InfluxDBContainer<?> influxDB = new InfluxDBContainer<>(INFLUXDB_IMAGE) //
