@@ -20,7 +20,6 @@ hivemqExtension {
 dependencies {
     implementation("com.izettle:metrics-influxdb:${property("metrics-influxdb.version")}")
     implementation("org.apache.commons:commons-lang3:${property("commons-lang3.version")}")
-    implementation("com.google.collections:google-collections:${property("google-collections.version")}")
 }
 
 /* ******************** resources ******************** */
@@ -46,11 +45,28 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-api:${property("junit-jupiter.version")}")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
     testImplementation("org.mockito:mockito-core:${property("mockito.version")}")
-    testImplementation("com.github.tomakehurst:wiremock-jre8-standalone:${property("wiremock.version")}")
+    testImplementation("com.github.tomakehurst:wiremock-jre8:${property("wiremock.version")}")
+
+    testRuntimeOnly("ch.qos.logback:logback-classic:${property("logback.version")}")
 }
 
 tasks.withType<Test>().configureEach {
     useJUnitPlatform()
+}
+
+/* ******************** integration test ******************** */
+
+dependencies {
+    integrationTestImplementation(platform("org.testcontainers:testcontainers-bom:${property("testcontainers.version")}"))
+
+    integrationTestImplementation("org.assertj:assertj-core:${property("assertj.version")}")
+    integrationTestImplementation("org.awaitility:awaitility:${property("awaitility.version")}")
+    integrationTestImplementation("com.hivemq:hivemq-mqtt-client:${property("hivemq-mqtt-client.version")}")
+    integrationTestImplementation("com.squareup.okhttp3:okhttp:${property("okhttp.version")}")
+    integrationTestImplementation("org.testcontainers:junit-jupiter")
+    integrationTestImplementation("org.testcontainers:influxdb")
+    integrationTestImplementation("org.testcontainers:hivemq")
+    integrationTestImplementation("org.influxdb:influxdb-java:${property("influxdb.version")}")
 }
 
 /* ******************** checks ******************** */
@@ -58,4 +74,6 @@ tasks.withType<Test>().configureEach {
 license {
     header = rootDir.resolve("HEADER")
     mapping("java", "SLASHSTAR_STYLE")
+    exclude("**/template-s3discovery.properties")
+    exclude("**/logback-test.xml")
 }

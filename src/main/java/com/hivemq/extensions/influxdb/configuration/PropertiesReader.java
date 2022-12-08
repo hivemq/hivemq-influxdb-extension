@@ -23,9 +23,8 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Objects;
 import java.util.Properties;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Load the content of a {@link File} into {@link Properties}.
@@ -34,13 +33,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public abstract class PropertiesReader {
 
-    private static final Logger log = LoggerFactory.getLogger(PropertiesReader.class);
+    private static final @NotNull Logger LOG = LoggerFactory.getLogger(PropertiesReader.class);
 
-    private final File configFilePath;
-    Properties properties;
+    private final @NotNull File configFilePath;
+    protected @Nullable Properties properties;
 
-    PropertiesReader(@NotNull final File configFilePath) {
-        checkNotNull(configFilePath, "Path to config file must not be null");
+    PropertiesReader(final @NotNull File configFilePath) {
+        Objects.requireNonNull(configFilePath, "Path to config file must not be null");
         this.configFilePath = configFilePath;
     }
 
@@ -50,14 +49,13 @@ public abstract class PropertiesReader {
      * @return <b>true</b> if properties are loaded, else <b>false</b>.
      */
     public boolean readPropertiesFromFile() {
-
         final File file = new File(configFilePath + File.separator + getFilename());
 
         try {
             loadProperties(file);
 
         } catch (IOException e) {
-            log.error("Not able to load configuration file '{}'", file.getAbsolutePath());
+            LOG.error("Not able to load configuration file '{}'", file.getAbsolutePath());
             return false;
         }
 
@@ -68,11 +66,11 @@ public abstract class PropertiesReader {
      * Fetch a property with given key from {@link Properties}.
      *
      * @param key The name of the property to look for.
-     * @return The property for the value if it exists, <b>null</b> if key or {@link Properties} doesn't exist or the value is an empty string.
+     * @return The property for the value if it exists, <b>null</b> if key or {@link Properties} doesn't exist or the
+     *         value is an empty string.
      */
-    @Nullable
-    String getProperty(@NotNull final String key) {
-        checkNotNull(key, "Key to fetch property for must not be null.");
+    @Nullable String getProperty(final @NotNull String key) {
+        Objects.requireNonNull(key, "Key to fetch property for must not be null.");
 
         if (properties == null) {
             return null;
@@ -93,8 +91,8 @@ public abstract class PropertiesReader {
      * @param file {@link File} where to load the properties from.
      * @throws IOException If properties could not be read from <b>file</b>.
      */
-    private void loadProperties(@NotNull final File file) throws IOException {
-        checkNotNull(file, "File that contains properties must not be null");
+    private void loadProperties(final @NotNull File file) throws IOException {
+        Objects.requireNonNull(file, "File that contains properties must not be null");
 
         try (final FileReader in = new FileReader(file)) {
             properties = new Properties();
@@ -102,5 +100,5 @@ public abstract class PropertiesReader {
         }
     }
 
-    public abstract String getFilename();
+    public abstract @NotNull String getFilename();
 }
