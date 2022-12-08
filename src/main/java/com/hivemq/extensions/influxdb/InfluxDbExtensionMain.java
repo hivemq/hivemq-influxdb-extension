@@ -48,11 +48,20 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class InfluxDbExtensionMain implements ExtensionMain {
 
-    private static final @NotNull Logger log = LoggerFactory.getLogger(InfluxDbExtensionMain.class);
+    private static final @NotNull Logger LOG = LoggerFactory.getLogger(InfluxDbExtensionMain.class);
     private static final @NotNull HashSet<String> METER_FIELDS =
             Sets.newHashSet("count", "m1_rate", "m5_rate", "m15_rate", "mean_rate");
-    private static final @NotNull HashSet<String> TIMER_FIELDS =
-            Sets.newHashSet("count", "min", "max", "mean", "stddev", "p50", "p75", "p95", "p98", "p99", "p999",
+    private static final @NotNull HashSet<String> TIMER_FIELDS = Sets.newHashSet("count",
+            "min",
+            "max",
+            "mean",
+            "stddev",
+            "p50",
+            "p75",
+            "p95",
+            "p98",
+            "p99",
+            "p999",
             "m1_rate",
             "m5_rate",
             "m15_rate",
@@ -64,7 +73,6 @@ public class InfluxDbExtensionMain implements ExtensionMain {
     public void extensionStart(
             final @NotNull ExtensionStartInput extensionStartInput,
             final @NotNull ExtensionStartOutput extensionStartOutput) {
-
         try {
             final File extensionHomeFolder = extensionStartInput.getExtensionInformation().getExtensionHomeFolder();
             final InfluxDbConfiguration configuration = new InfluxDbConfiguration(extensionHomeFolder);
@@ -90,8 +98,8 @@ public class InfluxDbExtensionMain implements ExtensionMain {
             final MetricRegistry metricRegistry = Services.metricRegistry();
             reporter = setupReporter(metricRegistry, sender, configuration);
             reporter.start(configuration.getReportingInterval(), TimeUnit.SECONDS);
-        } catch (Exception e) {
-            log.warn("Start failed because of", e);
+        } catch (final Exception e) {
+            LOG.warn("Start failed because of", e);
             extensionStartOutput.preventExtensionStartup("Start failed because of an exception");
         }
     }
@@ -146,7 +154,7 @@ public class InfluxDbExtensionMain implements ExtensionMain {
         try {
             switch (configuration.getMode()) {
                 case "http":
-                    log.info("Creating InfluxDB HTTP sender for server {}:{} and database {}", host, port, database);
+                    LOG.info("Creating InfluxDB HTTP sender for server {}:{} and database {}", host, port, database);
                     sender = new InfluxDbHttpSender(configuration.getProtocolOrDefault("http"),
                             host,
                             port,
@@ -158,15 +166,15 @@ public class InfluxDbExtensionMain implements ExtensionMain {
                             prefix);
                     break;
                 case "tcp":
-                    log.info("Creating InfluxDB TCP sender for server {}:{} and database {}", host, port, database);
+                    LOG.info("Creating InfluxDB TCP sender for server {}:{} and database {}", host, port, database);
                     sender = new InfluxDbTcpSender(host, port, connectTimeout, database, prefix);
                     break;
                 case "udp":
-                    log.info("Creating InfluxDB UDP sender for server {}:{} and database {}", host, port, database);
+                    LOG.info("Creating InfluxDB UDP sender for server {}:{} and database {}", host, port, database);
                     sender = new InfluxDbUdpSender(host, port, connectTimeout, database, prefix);
                     break;
                 case "cloud":
-                    log.info("Creating InfluxDB Cloud sender for endpoint {}, bucket {}, organization {}",
+                    LOG.info("Creating InfluxDB Cloud sender for endpoint {}, bucket {}, organization {}",
                             host,
                             bucket,
                             organization);
@@ -174,13 +182,20 @@ public class InfluxDbExtensionMain implements ExtensionMain {
                     checkNotNull(organization, "Organization must be defined in cloud mode");
                     sender = new InfluxDbCloudSender(configuration.getProtocolOrDefault("https"),
                             host,
-                            port, auth, TimeUnit.SECONDS, connectTimeout, connectTimeout, prefix, organization, bucket);
+                            port,
+                            auth,
+                            TimeUnit.SECONDS,
+                            connectTimeout,
+                            connectTimeout,
+                            prefix,
+                            organization,
+                            bucket);
                     break;
 
             }
         } catch (final Exception ex) {
-            log.error("Not able to start InfluxDB sender, please check your configuration: {}", ex.getMessage());
-            log.debug("Original Exception: ", ex);
+            LOG.error("Not able to start InfluxDB sender, please check your configuration: {}", ex.getMessage());
+            LOG.debug("Original Exception: ", ex);
         }
 
         return sender;
