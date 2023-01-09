@@ -54,6 +54,8 @@ Listed as a semicolon ( `;` ) separated list. | -
 
 |===
 
+NOTE: When using InfluxDB 2 the *_Cloud_* mode should be configured.
+
 .Example Configuration
 [source]
 ----
