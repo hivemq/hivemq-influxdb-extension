@@ -40,7 +40,7 @@ The extension won't start if this file is missing or the required properties are
 Possibilities are: http, tcp, udp, cloud | http
 | host | yes | The host name of the InfluxDB instance. | -
 | port | yes | The port number the InfluxDB instance is listening. | 8086
-| protocol | no | The protocol the InfluxDB sender uses in http mode. | http
+| protocol | no | The protocol the InfluxDB sender uses in http mode. | http (or https for cloud mode)
 | auth | no | The authorization string to be used to connect to InfluxDB, of format username:password.
 If mode "cloud" is used, the token must be passed here| -
 | prefix | no | The measurement prefix. | -
@@ -51,7 +51,6 @@ If mode "cloud" is used, the token must be passed here| -
 Listed as a semicolon ( `;` ) separated list. | -
 | organization | only for mode: "cloud" | The organization to push data to | -
 | bucket | only for mode: "cloud" | The bucket to push data to | -
-
 |===
 
 NOTE: When using InfluxDB 2 the *_Cloud_* mode should be configured.

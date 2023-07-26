@@ -73,14 +73,14 @@ public class InfluxDbCloudSender extends InfluxDbHttpSender {
         con.setReadTimeout(readTimeout);
         con.setRequestProperty("Content-Encoding", "gzip");
 
-        try (OutputStream out = con.getOutputStream();
+        try (final OutputStream out = con.getOutputStream();
              final GZIPOutputStream gzipOutputStream = new GZIPOutputStream(out)) {
             gzipOutputStream.write(line);
             gzipOutputStream.flush();
             out.flush();
         }
 
-        int responseCode = con.getResponseCode();
+        final int responseCode = con.getResponseCode();
 
         // Check if non 2XX response code.
         if (responseCode / 100 != 2) {
