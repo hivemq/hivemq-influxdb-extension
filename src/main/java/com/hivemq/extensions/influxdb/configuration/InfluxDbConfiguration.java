@@ -89,7 +89,7 @@ public class InfluxDbConfiguration extends PropertiesReader {
                 countError++;
             }
 
-        } catch (NumberFormatException e) {
+        } catch (final NumberFormatException e) {
             LOG.error("Value for mandatory InfluxDB property {} is not a number.", PORT);
             countError++;
         }
@@ -139,7 +139,7 @@ public class InfluxDbConfiguration extends PropertiesReader {
         final int port;
         try {
             port = Integer.parseInt(getProperty(PORT));
-        } catch (NumberFormatException e) {
+        } catch (final NumberFormatException e) {
             LOG.error("Value for {} is not a number", PORT);
             return null;
         }
@@ -183,7 +183,7 @@ public class InfluxDbConfiguration extends PropertiesReader {
 
         final HashMap<String, String> tagMap = new HashMap<>();
 
-        for (String tag : split) {
+        for (final String tag : split) {
             final String[] tagPair = StringUtils.split(tag, "=");
             if (tagPair.length != 2 || tagPair[0].length() < 1 || tagPair[1].length() < 1) {
                 LOG.warn("Invalid tag format {} for InfluxDB", tag);
@@ -254,11 +254,10 @@ public class InfluxDbConfiguration extends PropertiesReader {
             return defaultValue;
         }
 
-        int valueAsInt;
-
+        final int valueAsInt;
         try {
             valueAsInt = Integer.parseInt(value);
-        } catch (NumberFormatException e) {
+        } catch (final NumberFormatException e) {
             LOG.warn("Value for InfluxDB property '{}' is not a number, original value {}. Using default: {}",
                     key,
                     value,
