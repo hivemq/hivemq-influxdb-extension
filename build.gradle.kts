@@ -34,7 +34,7 @@ testing {
         "test"(JvmTestSuite::class) {
             dependencies {
                 implementation(libs.mockito)
-                implementation(libs.wiremock.jre8)
+                implementation(libs.wiremock)
                 runtimeOnly(libs.logback.classic)
             }
         }

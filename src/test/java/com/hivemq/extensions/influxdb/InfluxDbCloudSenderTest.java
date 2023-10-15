@@ -15,34 +15,26 @@
  */
 package com.hivemq.extensions.influxdb;
 
-import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
+import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
+import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import com.hivemq.extension.sdk.api.annotations.NotNull;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.util.concurrent.TimeUnit;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
-import static com.github.tomakehurst.wiremock.client.WireMock.post;
-import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
-import static com.github.tomakehurst.wiremock.client.WireMock.verify;
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
 /**
  * @author Christoph Schäbel
  */
+@WireMockTest
 class InfluxDbCloudSenderTest {
 
-    @RegisterExtension
-    static final @NotNull WireMockExtension wireMockExtension = new WireMockExtension();
-
     @Test
-    void test_write_data() throws Exception {
+    void test_write_data(final @NotNull WireMockRuntimeInfo wireMockRuntimeInfo) throws Exception {
         final InfluxDbCloudSender sender = new InfluxDbCloudSender("http",
                 "localhost",
-                wireMockExtension.getRuntimeInfo().getHttpPort(),
+                wireMockRuntimeInfo.getHttpPort(),
                 "token",
                 TimeUnit.MILLISECONDS,
                 3000,
@@ -51,7 +43,7 @@ class InfluxDbCloudSenderTest {
                 "testorg",
                 "testbucket");
 
-        wireMockExtension.stubFor(post(urlPathEqualTo("/api/v2/write")).willReturn(aResponse().withStatus(200)
+        stubFor(post(urlPathEqualTo("/api/v2/write")).willReturn(aResponse().withStatus(200)
                 .withBody("")));
 
         sender.writeData("line=line".getBytes());
