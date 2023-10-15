@@ -44,11 +44,11 @@ testing {
                 implementation(libs.assertj)
                 implementation(libs.awaitility)
                 implementation(libs.hivemq.mqttClient)
-                implementation(libs.okhttp)
                 implementation(libs.testcontainers.junitJupiter)
                 implementation(libs.testcontainers.hivemq)
                 implementation(libs.testcontainers.influxdb)
                 implementation(libs.influxdb)
+                implementation(libs.okhttp)
                 runtimeOnly(libs.logback.classic)
             }
         }
