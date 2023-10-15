@@ -54,7 +54,6 @@ testing {
                 implementation(libs.awaitility)
                 implementation(libs.hivemq.mqttClient)
                 implementation(libs.okhttp)
-                implementation(platform(libs.testcontainers.bom))
                 implementation(libs.testcontainers.junitJupiter)
                 implementation(libs.testcontainers.hivemq)
                 implementation(libs.testcontainers.influxdb)
