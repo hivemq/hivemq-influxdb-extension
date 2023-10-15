@@ -21,8 +21,6 @@ commonsLang = { module = "org.apache.commons:commons-lang3", version.ref = "comm
 hivemq-mqttClient = { module = "com.hivemq:hivemq-mqtt-client", version.ref = "hivemq-mqttClient" }
 influxdb = { module = "org.influxdb:influxdb-java", version.ref = "influxdb" }
 jetbrains-annotations = { module = "org.jetbrains:annotations", version.ref = "jetbrains-annotations" }
-junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit-jupiter" }
-junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit-jupiter" }
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 metrics-influxdb = { module = "com.izettle:metrics-influxdb", version.ref = "metrics-influxdb" }
 mockito = { module = "org.mockito:mockito-core", version.ref = "mockito" }
