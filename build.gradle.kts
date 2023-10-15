@@ -1,7 +1,7 @@
 plugins {
     id("com.hivemq.extension")
     id("com.github.hierynomus.license")
-    id("com.github.sgtsilvio.gradle.utf8")
+    id("io.github.sgtsilvio.gradle.defaults")
     id("org.asciidoctor.jvm.convert")
 }
 
@@ -54,6 +54,7 @@ tasks.withType<Test>().configureEach {
 dependencies {
     integrationTestImplementation(platform("org.testcontainers:testcontainers-bom:${property("testcontainers.version")}"))
 
+    integrationTestCompileOnly("org.jetbrains:annotations:${property("jetbrains-annotations.version")}")
     integrationTestImplementation("org.assertj:assertj-core:${property("assertj.version")}")
     integrationTestImplementation("org.awaitility:awaitility:${property("awaitility.version")}")
     integrationTestImplementation("com.hivemq:hivemq-mqtt-client:${property("hivemq-mqtt-client.version")}")
@@ -62,6 +63,7 @@ dependencies {
     integrationTestImplementation("org.testcontainers:influxdb")
     integrationTestImplementation("org.testcontainers:hivemq")
     integrationTestImplementation("org.influxdb:influxdb-java:${property("influxdb.version")}")
+    integrationTestRuntimeOnly("ch.qos.logback:logback-classic:${property("logback.version")}")
 }
 
 /* ******************** checks ******************** */
