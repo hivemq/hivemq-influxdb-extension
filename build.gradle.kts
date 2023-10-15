@@ -34,37 +34,36 @@ tasks.asciidoctor {
     secondarySources { exclude("**") }
 }
 
-/* ******************** test ******************** */
-
-dependencies {
-    testImplementation(libs.junit.jupiter.api)
-    testRuntimeOnly(libs.junit.jupiter.engine)
-    testImplementation(libs.mockito)
-    testImplementation(libs.wiremock.jre8)
-    testRuntimeOnly(libs.logback.classic)
+@Suppress("UnstableApiUsage")
+testing {
+    suites {
+        withType<JvmTestSuite> {
+            useJUnitJupiter(libs.versions.junit.jupiter)
+        }
+        "test"(JvmTestSuite::class) {
+            dependencies {
+                implementation(libs.mockito)
+                implementation(libs.wiremock.jre8)
+                runtimeOnly(libs.logback.classic)
+            }
+        }
+        "integrationTest"(JvmTestSuite::class) {
+            dependencies {
+                compileOnly(libs.jetbrains.annotations)
+                implementation(libs.assertj)
+                implementation(libs.awaitility)
+                implementation(libs.hivemq.mqttClient)
+                implementation(libs.okhttp)
+                implementation(platform(libs.testcontainers.bom))
+                implementation(libs.testcontainers.junitJupiter)
+                implementation(libs.testcontainers.hivemq)
+                implementation(libs.testcontainers.influxdb)
+                implementation(libs.influxdb)
+                runtimeOnly(libs.logback.classic)
+            }
+        }
+    }
 }
-
-tasks.withType<Test>().configureEach {
-    useJUnitPlatform()
-}
-
-/* ******************** integration test ******************** */
-
-dependencies {
-    integrationTestCompileOnly(libs.jetbrains.annotations)
-    integrationTestImplementation(libs.assertj)
-    integrationTestImplementation(libs.awaitility)
-    integrationTestImplementation(libs.hivemq.mqttClient)
-    integrationTestImplementation(libs.okhttp)
-    integrationTestImplementation(platform(libs.testcontainers.bom))
-    integrationTestImplementation(libs.testcontainers.junitJupiter)
-    integrationTestImplementation(libs.testcontainers.influxdb)
-    integrationTestImplementation(libs.testcontainers.hivemq)
-    integrationTestImplementation(libs.influxdb)
-    integrationTestRuntimeOnly(libs.logback.classic)
-}
-
-/* ******************** checks ******************** */
 
 license {
     header = rootDir.resolve("HEADER")
