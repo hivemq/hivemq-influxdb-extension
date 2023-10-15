@@ -1,8 +1,8 @@
 plugins {
-    id("com.hivemq.extension")
-    id("com.github.hierynomus.license")
-    id("io.github.sgtsilvio.gradle.defaults")
-    id("org.asciidoctor.jvm.convert")
+    alias(libs.plugins.hivemq.extension)
+    alias(libs.plugins.defaults)
+    alias(libs.plugins.license)
+    alias(libs.plugins.asciidoctor)
 }
 
 group = "com.hivemq.extensions"
@@ -14,7 +14,7 @@ hivemqExtension {
     priority.set(1000)
     startPriority.set(1000)
     mainClass.set("$group.influxdb.InfluxDbExtensionMain")
-    sdkVersion.set("${property("hivemq-extension-sdk.version")}")
+    sdkVersion.set(libs.versions.hivemq.extensionSdk)
 
     resources {
         from("LICENSE")
@@ -24,8 +24,8 @@ hivemqExtension {
 }
 
 dependencies {
-    implementation("com.izettle:metrics-influxdb:${property("metrics-influxdb.version")}")
-    implementation("org.apache.commons:commons-lang3:${property("commons-lang3.version")}")
+    implementation(libs.metrics.influxdb)
+    implementation(libs.commonsLang)
 }
 
 tasks.asciidoctor {
@@ -37,12 +37,11 @@ tasks.asciidoctor {
 /* ******************** test ******************** */
 
 dependencies {
-    testImplementation("org.junit.jupiter:junit-jupiter-api:${property("junit-jupiter.version")}")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
-    testImplementation("org.mockito:mockito-core:${property("mockito.version")}")
-    testImplementation("com.github.tomakehurst:wiremock-jre8:${property("wiremock.version")}")
-
-    testRuntimeOnly("ch.qos.logback:logback-classic:${property("logback.version")}")
+    testImplementation(libs.junit.jupiter.api)
+    testRuntimeOnly(libs.junit.jupiter.engine)
+    testImplementation(libs.mockito)
+    testImplementation(libs.wiremock.jre8)
+    testRuntimeOnly(libs.logback.classic)
 }
 
 tasks.withType<Test>().configureEach {
@@ -52,18 +51,17 @@ tasks.withType<Test>().configureEach {
 /* ******************** integration test ******************** */
 
 dependencies {
-    integrationTestImplementation(platform("org.testcontainers:testcontainers-bom:${property("testcontainers.version")}"))
-
-    integrationTestCompileOnly("org.jetbrains:annotations:${property("jetbrains-annotations.version")}")
-    integrationTestImplementation("org.assertj:assertj-core:${property("assertj.version")}")
-    integrationTestImplementation("org.awaitility:awaitility:${property("awaitility.version")}")
-    integrationTestImplementation("com.hivemq:hivemq-mqtt-client:${property("hivemq-mqtt-client.version")}")
-    integrationTestImplementation("com.squareup.okhttp3:okhttp:${property("okhttp.version")}")
-    integrationTestImplementation("org.testcontainers:junit-jupiter")
-    integrationTestImplementation("org.testcontainers:influxdb")
-    integrationTestImplementation("org.testcontainers:hivemq")
-    integrationTestImplementation("org.influxdb:influxdb-java:${property("influxdb.version")}")
-    integrationTestRuntimeOnly("ch.qos.logback:logback-classic:${property("logback.version")}")
+    integrationTestCompileOnly(libs.jetbrains.annotations)
+    integrationTestImplementation(libs.assertj)
+    integrationTestImplementation(libs.awaitility)
+    integrationTestImplementation(libs.hivemq.mqttClient)
+    integrationTestImplementation(libs.okhttp)
+    integrationTestImplementation(platform(libs.testcontainers.bom))
+    integrationTestImplementation(libs.testcontainers.junitJupiter)
+    integrationTestImplementation(libs.testcontainers.influxdb)
+    integrationTestImplementation(libs.testcontainers.hivemq)
+    integrationTestImplementation(libs.influxdb)
+    integrationTestRuntimeOnly(libs.logback.classic)
 }
 
 /* ******************** checks ******************** */
