@@ -12,7 +12,6 @@ hivemqExtension {
     author.set("HiveMQ")
     priority.set(1000)
     startPriority.set(1000)
-    mainClass.set("$group.influxdb.InfluxDbExtensionMain")
     sdkVersion.set(libs.versions.hivemq.extensionSdk)
 
     resources {
