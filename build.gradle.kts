@@ -8,11 +8,11 @@ group = "com.hivemq.extensions"
 description = "HiveMQ extension for transferring monitoring data to the time series database InfluxDB"
 
 hivemqExtension {
-    name.set("InfluxDB Monitoring Extension")
-    author.set("HiveMQ")
-    priority.set(1000)
-    startPriority.set(1000)
-    sdkVersion.set(libs.versions.hivemq.extensionSdk)
+    name = "InfluxDB Monitoring Extension"
+    author = "HiveMQ"
+    priority = 1000
+    startPriority = 1000
+    sdkVersion = libs.versions.hivemq.extensionSdk
 
     resources {
         from("LICENSE")
