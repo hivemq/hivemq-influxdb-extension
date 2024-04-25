@@ -185,7 +185,7 @@ public class InfluxDbConfiguration extends PropertiesReader {
 
         for (final String tag : split) {
             final String[] tagPair = StringUtils.split(tag, "=");
-            if (tagPair.length != 2 || tagPair[0].length() < 1 || tagPair[1].length() < 1) {
+            if (tagPair.length != 2 || tagPair[0].isEmpty() || tagPair[1].isEmpty()) {
                 LOG.warn("Invalid tag format {} for InfluxDB", tag);
                 continue;
             }
