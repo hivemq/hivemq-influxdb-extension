@@ -19,8 +19,6 @@ import com.codahale.metrics.MetricFilter;
 import com.codahale.metrics.MetricRegistry;
 import com.codahale.metrics.ScheduledReporter;
 import com.hivemq.extension.sdk.api.ExtensionMain;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
-import com.hivemq.extension.sdk.api.annotations.Nullable;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStartInput;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStartOutput;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStopInput;
@@ -32,6 +30,8 @@ import com.izettle.metrics.influxdb.InfluxDbReporter;
 import com.izettle.metrics.influxdb.InfluxDbSender;
 import com.izettle.metrics.influxdb.InfluxDbTcpSender;
 import com.izettle.metrics.influxdb.InfluxDbUdpSender;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,8 +51,17 @@ public class InfluxDbExtensionMain implements ExtensionMain {
 
     private static final @NotNull HashSet<String> METER_FIELDS =
             newHashSet("count", "m1_rate", "m5_rate", "m15_rate", "mean_rate");
-    private static final @NotNull HashSet<String> TIMER_FIELDS =
-            newHashSet("count", "min", "max", "mean", "stddev", "p50", "p75", "p95", "p98", "p99", "p999",
+    private static final @NotNull HashSet<String> TIMER_FIELDS = newHashSet("count",
+            "min",
+            "max",
+            "mean",
+            "stddev",
+            "p50",
+            "p75",
+            "p95",
+            "p98",
+            "p99",
+            "p999",
             "m1_rate",
             "m5_rate",
             "m15_rate",

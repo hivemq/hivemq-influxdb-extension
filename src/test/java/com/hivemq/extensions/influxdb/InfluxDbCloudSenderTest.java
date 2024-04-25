@@ -17,12 +17,19 @@ package com.hivemq.extensions.influxdb;
 
 import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
 import com.github.tomakehurst.wiremock.junit5.WireMockTest;
-import com.hivemq.extension.sdk.api.annotations.NotNull;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.TimeUnit;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 
 /**
  * @author Christoph Schäbel
@@ -43,8 +50,7 @@ class InfluxDbCloudSenderTest {
                 "testorg",
                 "testbucket");
 
-        stubFor(post(urlPathEqualTo("/api/v2/write")).willReturn(aResponse().withStatus(200)
-                .withBody("")));
+        stubFor(post(urlPathEqualTo("/api/v2/write")).willReturn(aResponse().withStatus(200).withBody("")));
 
         sender.writeData("line=line".getBytes());
 
