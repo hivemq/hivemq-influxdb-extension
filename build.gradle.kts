@@ -20,6 +20,8 @@ hivemqExtension {
 }
 
 dependencies {
+    compileOnly(libs.jetbrains.annotations)
+
     implementation(libs.metrics.influxdb)
     implementation(libs.commonsLang)
 }
@@ -32,6 +34,7 @@ testing {
         }
         "test"(JvmTestSuite::class) {
             dependencies {
+                compileOnly(libs.jetbrains.annotations)
                 implementation(libs.mockito)
                 implementation(libs.wiremock)
                 runtimeOnly(libs.logback.classic)

@@ -15,9 +15,9 @@
  */
 package com.hivemq.extensions.influxdb;
 
-import com.hivemq.extension.sdk.api.annotations.NotNull;
 import com.izettle.metrics.influxdb.InfluxDbHttpSender;
 import com.izettle.metrics.influxdb.utils.TimeUtils;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.OutputStream;

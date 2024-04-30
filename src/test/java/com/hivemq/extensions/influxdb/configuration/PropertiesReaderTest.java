@@ -15,7 +15,7 @@
  */
 package com.hivemq.extensions.influxdb.configuration;
 
-import com.hivemq.extension.sdk.api.annotations.NotNull;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -34,6 +34,7 @@ class PropertiesReaderTest {
 
     @Test
     void readPropertiesFromFile_file_null() {
+        //noinspection DataFlowIssue
         assertThrows(NullPointerException.class, () -> new PropertiesReader(null) {
             @Override
             public @NotNull String getFilename() {
@@ -81,6 +82,7 @@ class PropertiesReaderTest {
         assertTrue(propertiesReader.readPropertiesFromFile());
         assertEquals("value", propertiesReader.getProperty("key"));
 
+        //noinspection DataFlowIssue
         assertThrows(NullPointerException.class, () -> propertiesReader.getProperty(null));
     }
 
