@@ -3,6 +3,7 @@
 :hivemq-support: {hivemq-link}/support/
 :docker: https://www.docker.com/
 :influxdb-docker: https://hub.docker.com/_/influxdb/
+:download-influxdb-extension: https://www.hivemq.com/products/extensions/influxdb-extension/
 
 = HiveMQ InfluxDB Monitoring Extension
 
@@ -20,7 +21,7 @@ This database can be used as the data source for a monitoring dashboard (like Gr
 
 Installing the extension for HiveMQ is very easy:
 
-. Unzip the downloaded zip file
+. Download the extension from the {download-influxdb-extension}[HiveMQ website] and unzip the downloaded zip file.
 . In the folder `hivemq-influxdb-extension`, modify the `influxdb.properties` file to fit your needs.
 Check that the mandatory properties (host, port) are set
 . Copy the folder `hivemq-influxdb-extension` to your `<HIVEMQ_HOME>/extensions` folder
