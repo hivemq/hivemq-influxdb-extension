@@ -17,6 +17,7 @@ package com.hivemq.extensions.influxdb;
 
 import com.hivemq.client.mqtt.mqtt5.Mqtt5BlockingClient;
 import com.hivemq.client.mqtt.mqtt5.Mqtt5Client;
+import io.github.sgtsilvio.gradle.oci.junit.jupiter.OciImages;
 import org.influxdb.InfluxDB;
 import org.influxdb.dto.Query;
 import org.influxdb.dto.QueryResult;
@@ -33,8 +34,6 @@ import org.testcontainers.utility.MountableFile;
 
 import java.util.List;
 
-import static com.hivemq.extensions.influxdb.DockerImageNames.HIVEMQ_IMAGE;
-import static com.hivemq.extensions.influxdb.DockerImageNames.INFLUXDB_IMAGE;
 import static org.awaitility.Awaitility.await;
 import static org.influxdb.querybuilder.BuiltQuery.QueryBuilder.select;
 
@@ -49,7 +48,7 @@ public class InfluxDbExtensionIT {
     private final @NotNull Network network = Network.newNetwork();
 
     @Container
-    private final @NotNull HiveMQContainer hivemq = new HiveMQContainer(HIVEMQ_IMAGE) //
+    private final @NotNull HiveMQContainer hivemq = new HiveMQContainer(OciImages.getImageName("hivemq/hivemq-ce")) //
             .withExtension(MountableFile.forClasspathResource("hivemq-influxdb-extension"))
             .waitForExtension("InfluxDB Monitoring Extension")
             .withNetwork(network)
@@ -59,7 +58,7 @@ public class InfluxDbExtensionIT {
             .withLogConsumer(outputFrame -> System.out.print("HIVEMQ: " + outputFrame.getUtf8String()));
 
     @Container
-    private final @NotNull InfluxDBContainer<?> influxDB = new InfluxDBContainer<>(INFLUXDB_IMAGE) //
+    private final @NotNull InfluxDBContainer<?> influxDB = new InfluxDBContainer<>(OciImages.getImageName("influxdb")) //
             .withAuthEnabled(false).withNetwork(network).withNetworkAliases("influxdb");
 
     @Test
