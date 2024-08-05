@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.hivemq.extension)
     alias(libs.plugins.defaults)
+    alias(libs.plugins.oci)
     alias(libs.plugins.license)
 }
 
@@ -21,9 +22,16 @@ hivemqExtension {
 
 dependencies {
     compileOnly(libs.jetbrains.annotations)
-
     implementation(libs.metrics.influxdb)
     implementation(libs.commonsLang)
+}
+
+oci {
+    registries {
+        dockerHub {
+            optionalCredentials()
+        }
+    }
 }
 
 @Suppress("UnstableApiUsage")
@@ -49,9 +57,14 @@ testing {
                 implementation(libs.testcontainers.junitJupiter)
                 implementation(libs.testcontainers.hivemq)
                 implementation(libs.testcontainers.influxdb)
+                implementation(libs.gradleOci.junitJupiter)
                 implementation(libs.influxdb)
                 implementation(libs.okhttp)
                 runtimeOnly(libs.logback.classic)
+            }
+            ociImageDependencies {
+                runtime("hivemq:hivemq-ce:latest") { isChanging = true }
+                runtime("library:influxdb:1.4.3").name("influxdb").tag("latest")
             }
         }
     }
