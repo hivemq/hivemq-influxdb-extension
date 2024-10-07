@@ -62,9 +62,11 @@ testing {
                 implementation(libs.okhttp)
                 runtimeOnly(libs.logback.classic)
             }
-            ociImageDependencies {
-                runtime("hivemq:hivemq-ce:latest") { isChanging = true }
-                runtime("library:influxdb:1.4.3").name("influxdb").tag("latest")
+            oci.of(this) {
+                imageDependencies {
+                    runtime("hivemq:hivemq-ce:latest") { isChanging = true }
+                    runtime("library:influxdb:1.4.3").name("influxdb").tag("latest")
+                }
             }
         }
     }
