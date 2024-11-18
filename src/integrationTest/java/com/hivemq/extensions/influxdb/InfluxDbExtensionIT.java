@@ -48,18 +48,19 @@ public class InfluxDbExtensionIT {
     private final @NotNull Network network = Network.newNetwork();
 
     @Container
-    private final @NotNull HiveMQContainer hivemq = new HiveMQContainer(OciImages.getImageName("hivemq/hivemq-ce")) //
-            .withExtension(MountableFile.forClasspathResource("hivemq-influxdb-extension"))
-            .waitForExtension("InfluxDB Monitoring Extension")
-            .withNetwork(network)
-            .withFileInExtensionHomeFolder(MountableFile.forClasspathResource("influxdb.properties"),
-                    "hivemq-influxdb-extension",
-                    "influxdb.properties")
-            .withLogConsumer(outputFrame -> System.out.print("HIVEMQ: " + outputFrame.getUtf8String()));
+    private final @NotNull HiveMQContainer hivemq =
+            new HiveMQContainer(OciImages.getImageName("hivemq/extensions/hivemq-influxdb-extension")
+                    .asCompatibleSubstituteFor("hivemq/hivemq-ce")) //
+                    .withNetwork(network)
+                    .withCopyToContainer(MountableFile.forClasspathResource("influxdb.properties"),
+                            "/opt/hivemq/extensions/hivemq-influxdb-extension/influxdb.properties")
+                    .withLogConsumer(outputFrame -> System.out.print("HIVEMQ: " + outputFrame.getUtf8String()));
 
     @Container
-    private final @NotNull InfluxDBContainer<?> influxDB = new InfluxDBContainer<>(OciImages.getImageName("influxdb")) //
-            .withAuthEnabled(false).withNetwork(network).withNetworkAliases("influxdb");
+    private final @NotNull InfluxDBContainer<?> influxDB =
+            new InfluxDBContainer<>(OciImages.getImageName("influxdb")).withAuthEnabled(false)
+                    .withNetwork(network)
+                    .withNetworkAliases("influxdb");
 
     @Test
     void testMetricsAreForwardedToInfluxDB() {
