@@ -35,18 +35,17 @@ import static org.mockito.Mockito.when;
 
 class InfluxDbExtensionMainTest {
 
+    private final @NotNull ExtensionStartInput extensionStartInput = mock();
+    private final @NotNull ExtensionStartOutput extensionStartOutput = mock();
+
     private @NotNull InfluxDbExtensionMain main;
-    private @NotNull ExtensionStartInput extensionStartInput;
-    private @NotNull ExtensionStartOutput extensionStartOutput;
     private @NotNull Path file;
 
     @BeforeEach
     void setUp(final @TempDir @NotNull Path tempDir) {
         main = new InfluxDbExtensionMain();
 
-        extensionStartInput = mock(ExtensionStartInput.class);
-        extensionStartOutput = mock(ExtensionStartOutput.class);
-        final ExtensionInformation extensionInformation = mock(ExtensionInformation.class);
+        final var extensionInformation = mock(ExtensionInformation.class);
         when(extensionStartInput.getExtensionInformation()).thenReturn(extensionInformation);
         when(extensionStartInput.getExtensionInformation().getExtensionHomeFolder()).thenReturn(tempDir.toFile());
 

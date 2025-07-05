@@ -20,7 +20,6 @@ import com.izettle.metrics.influxdb.utils.TimeUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -55,34 +54,29 @@ public class InfluxDbCloudSender extends InfluxDbHttpSender {
         this.authToken = authToken;
         this.connectTimeout = connectTimeout;
         this.readTimeout = readTimeout;
-
-        final String endpoint = new URL(protocol, host, port, "/api/v2/write").toString();
-        final String queryPrecision = String.format("precision=%s", TimeUtils.toTimePrecision(timePrecision));
-        final String orgParameter = String.format("org=%s", URLEncoder.encode(organization, StandardCharsets.UTF_8));
-        final String bucketParameter = String.format("bucket=%s", URLEncoder.encode(bucket, StandardCharsets.UTF_8));
+        final var endpoint = new URL(protocol, host, port, "/api/v2/write").toString();
+        final var queryPrecision = String.format("precision=%s", TimeUtils.toTimePrecision(timePrecision));
+        final var orgParameter = String.format("org=%s", URLEncoder.encode(organization, StandardCharsets.UTF_8));
+        final var bucketParameter = String.format("bucket=%s", URLEncoder.encode(bucket, StandardCharsets.UTF_8));
         this.url = new URL(endpoint + "?" + queryPrecision + "&" + orgParameter + "&" + bucketParameter);
     }
 
     @Override
     protected int writeData(final byte @NotNull [] line) throws Exception {
-        final HttpURLConnection con = (HttpURLConnection) url.openConnection();
+        final var con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("POST");
         con.setRequestProperty("Authorization", "Token " + authToken);
         con.setDoOutput(true);
         con.setConnectTimeout(connectTimeout);
         con.setReadTimeout(readTimeout);
         con.setRequestProperty("Content-Encoding", "gzip");
-
-        try (final OutputStream out = con.getOutputStream();
-             final GZIPOutputStream gzipOutputStream = new GZIPOutputStream(out)) {
+        try (final var out = con.getOutputStream(); final var gzipOutputStream = new GZIPOutputStream(out)) {
             gzipOutputStream.write(line);
             gzipOutputStream.flush();
             out.flush();
         }
-
-        final int responseCode = con.getResponseCode();
-
-        // Check if non 2XX response code.
+        // check if non 2XX response code
+        final var responseCode = con.getResponseCode();
         if (responseCode / 100 != 2) {
             throw new IOException("Server returned HTTP response code: " +
                     responseCode +

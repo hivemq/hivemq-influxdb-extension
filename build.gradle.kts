@@ -70,6 +70,7 @@ testing {
         "test"(JvmTestSuite::class) {
             dependencies {
                 compileOnly(libs.jetbrains.annotations)
+                implementation(libs.assertj)
                 implementation(libs.mockito)
                 implementation(libs.wiremock)
                 runtimeOnly(libs.logback.classic)
@@ -86,7 +87,6 @@ testing {
                 implementation(libs.testcontainers.influxdb)
                 implementation(libs.gradleOci.junitJupiter)
                 implementation(libs.influxdb)
-                implementation(libs.okhttp)
                 runtimeOnly(libs.logback.classic)
             }
             oci.of(this) {

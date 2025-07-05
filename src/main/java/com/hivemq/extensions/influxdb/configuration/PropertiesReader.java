@@ -49,16 +49,13 @@ public abstract class PropertiesReader {
      * @return <b>true</b> if properties are loaded, else <b>false</b>.
      */
     public boolean readPropertiesFromFile() {
-        final File file = new File(configFilePath + File.separator + getFilename());
-
+        final var file = new File(configFilePath + File.separator + getFilename());
         try {
             loadProperties(file);
-
-        } catch (IOException e) {
+        } catch (final IOException e) {
             LOG.error("Not able to load configuration file '{}'", file.getAbsolutePath());
             return false;
         }
-
         return true;
     }
 
@@ -71,17 +68,13 @@ public abstract class PropertiesReader {
      */
     @Nullable String getProperty(final @NotNull String key) {
         Objects.requireNonNull(key, "Key to fetch property for must not be null.");
-
         if (properties == null) {
             return null;
         }
-
-        final String property = properties.getProperty(key);
-
+        final var property = properties.getProperty(key);
         if (property == null || property.isEmpty()) {
             return null;
         }
-
         return property;
     }
 
@@ -93,8 +86,7 @@ public abstract class PropertiesReader {
      */
     private void loadProperties(final @NotNull File file) throws IOException {
         Objects.requireNonNull(file, "File that contains properties must not be null");
-
-        try (final FileReader in = new FileReader(file)) {
+        try (final var in = new FileReader(file)) {
             properties = new Properties();
             properties.load(in);
         }

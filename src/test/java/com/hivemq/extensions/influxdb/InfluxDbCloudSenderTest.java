@@ -39,7 +39,7 @@ class InfluxDbCloudSenderTest {
 
     @Test
     void test_write_data(final @NotNull WireMockRuntimeInfo wireMockRuntimeInfo) throws Exception {
-        final InfluxDbCloudSender sender = new InfluxDbCloudSender("http",
+        final var sender = new InfluxDbCloudSender("http",
                 "localhost",
                 wireMockRuntimeInfo.getHttpPort(),
                 "token",

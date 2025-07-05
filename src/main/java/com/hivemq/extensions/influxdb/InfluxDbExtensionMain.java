@@ -35,11 +35,10 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -49,9 +48,9 @@ public class InfluxDbExtensionMain implements ExtensionMain {
 
     private static final @NotNull Logger LOG = LoggerFactory.getLogger(InfluxDbExtensionMain.class);
 
-    private static final @NotNull HashSet<String> METER_FIELDS =
-            newHashSet("count", "m1_rate", "m5_rate", "m15_rate", "mean_rate");
-    private static final @NotNull HashSet<String> TIMER_FIELDS = newHashSet("count",
+    private static final @NotNull Set<String> METER_FIELDS =
+            Set.of("count", "m1_rate", "m5_rate", "m15_rate", "mean_rate");
+    private static final @NotNull Set<String> TIMER_FIELDS = Set.of("count",
             "min",
             "max",
             "mean",
@@ -74,28 +73,23 @@ public class InfluxDbExtensionMain implements ExtensionMain {
             final @NotNull ExtensionStartInput extensionStartInput,
             final @NotNull ExtensionStartOutput extensionStartOutput) {
         try {
-            final File extensionHomeFolder = extensionStartInput.getExtensionInformation().getExtensionHomeFolder();
-            final InfluxDbConfiguration configuration = new InfluxDbConfiguration(extensionHomeFolder);
-
+            final var extensionHomeFolder = extensionStartInput.getExtensionInformation().getExtensionHomeFolder();
+            final var configuration = new InfluxDbConfiguration(extensionHomeFolder);
             if (!configuration.readPropertiesFromFile()) {
                 extensionStartOutput.preventExtensionStartup("Could not read influxdb properties");
                 return;
             }
-
             if (!configuration.validateConfiguration()) {
                 extensionStartOutput.preventExtensionStartup("At least one mandatory property not set");
                 return;
             }
-
-            final InfluxDbSender sender = setupSender(configuration);
-
+            final var sender = setupSender(configuration);
             if (sender == null) {
                 extensionStartOutput.preventExtensionStartup(
                         "Couldn't create an influxdb sender. Please check that the configuration is correct");
                 return;
             }
-
-            final MetricRegistry metricRegistry = Services.metricRegistry();
+            final var metricRegistry = Services.metricRegistry();
             reporter = setupReporter(metricRegistry, sender, configuration);
             reporter.start(configuration.getReportingInterval(), TimeUnit.SECONDS);
         } catch (final Exception e) {
@@ -120,9 +114,7 @@ public class InfluxDbExtensionMain implements ExtensionMain {
         Objects.requireNonNull(metricRegistry, "MetricRegistry for influxdb must not be null");
         Objects.requireNonNull(sender, "InfluxDbSender for influxdb must not be null");
         Objects.requireNonNull(configuration, "Configuration for influxdb must not be null");
-
-        final Map<String, String> tags = configuration.getTags();
-
+        final var tags = configuration.getTags();
         return InfluxDbReporter.forRegistry(metricRegistry)
                 .withTags(tags)
                 .convertRatesTo(TimeUnit.SECONDS)
@@ -137,20 +129,18 @@ public class InfluxDbExtensionMain implements ExtensionMain {
 
     private @Nullable InfluxDbSender setupSender(final @NotNull InfluxDbConfiguration configuration) {
         Objects.requireNonNull(configuration, "Configuration for influxdb must not be null");
-
-        final String host = configuration.getHost();
-        final int port = configuration.getPort();
-        final String database = configuration.getDatabase();
-        final String auth = configuration.getAuth();
-        final int connectTimeout = configuration.getConnectTimeout();
-        final String prefix = configuration.getPrefix();
+        final var host = configuration.getHost();
+        final var port = configuration.getPort();
+        final var database = configuration.getDatabase();
+        final var auth = configuration.getAuth();
+        final var connectTimeout = configuration.getConnectTimeout();
+        final var prefix = configuration.getPrefix();
 
         // cloud
-        final String bucket = configuration.getBucket();
-        final String organization = configuration.getOrganization();
+        final var bucket = configuration.getBucket();
+        final var organization = configuration.getOrganization();
 
         InfluxDbSender sender = null;
-
         try {
             switch (configuration.getMode()) {
                 case "http":
@@ -191,18 +181,16 @@ public class InfluxDbExtensionMain implements ExtensionMain {
                             organization,
                             bucket);
                     break;
-
             }
         } catch (final Exception ex) {
             LOG.error("Not able to start InfluxDB sender, please check your configuration: {}", ex.getMessage());
             LOG.debug("Original Exception: ", ex);
         }
-
         return sender;
     }
 
-    public static HashSet<String> newHashSet(final String @NotNull ... elements) {
-        final HashSet<String> set = new HashSet<>();
+    public static Set<String> newHashSet(final String @NotNull ... elements) {
+        final var set = new HashSet<String>();
         Collections.addAll(set, elements);
         return set;
     }
