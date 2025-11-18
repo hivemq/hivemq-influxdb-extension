@@ -88,11 +88,12 @@ testing {
                 implementation(libs.assertj)
                 implementation(libs.awaitility)
                 implementation(libs.hivemq.mqttClient)
-                implementation(libs.testcontainers.junitJupiter)
+                implementation(libs.testcontainers)
                 implementation(libs.testcontainers.hivemq)
                 implementation(libs.testcontainers.influxdb)
+                implementation(libs.testcontainers.junitJupiter)
                 implementation(libs.gradleOci.junitJupiter)
-                implementation(libs.influxdb)
+                implementation(libs.influxdb.client)
                 runtimeOnly(libs.logback.classic)
             }
             oci.of(this) {
