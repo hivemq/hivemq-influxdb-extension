@@ -5,13 +5,13 @@ commonsLang = "3.20.0"
 gradleOci-junitJupiter = "0.8.0"
 hivemq-extensionSdk = "4.1.0"
 hivemq-mqttClient = "1.3.10"
-influxdb = "2.25"
+influxdb-client = "7.4.0"
 jetbrains-annotations = "26.0.2-1"
 junit-jupiter = "5.10.0"
 logback = "1.5.21"
 metrics-influxdb = "1.3.4"
 mockito = "5.20.0"
-testcontainers = "1.21.3"
+testcontainers = "2.0.2"
 wiremock = "3.13.2"
 
 [libraries]
@@ -20,14 +20,15 @@ awaitility = { module = "org.awaitility:awaitility", version.ref = "awaitility" 
 commonsLang = { module = "org.apache.commons:commons-lang3", version.ref = "commonsLang" }
 gradleOci-junitJupiter = { module = "io.github.sgtsilvio:gradle-oci-junit-jupiter", version.ref = "gradleOci-junitJupiter" }
 hivemq-mqttClient = { module = "com.hivemq:hivemq-mqtt-client", version.ref = "hivemq-mqttClient" }
-influxdb = { module = "org.influxdb:influxdb-java", version.ref = "influxdb" }
+influxdb-client = { module = "com.influxdb:influxdb-client-java", version.ref = "influxdb-client" }
 jetbrains-annotations = { module = "org.jetbrains:annotations", version.ref = "jetbrains-annotations" }
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 metrics-influxdb = { module = "com.izettle:metrics-influxdb", version.ref = "metrics-influxdb" }
 mockito = { module = "org.mockito:mockito-core", version.ref = "mockito" }
-testcontainers-hivemq = { module = "org.testcontainers:hivemq", version.ref = "testcontainers" }
-testcontainers-influxdb = { module = "org.testcontainers:influxdb", version.ref = "testcontainers" }
-testcontainers-junitJupiter = { module = "org.testcontainers:junit-jupiter", version.ref = "testcontainers" }
+testcontainers = { module = "org.testcontainers:testcontainers", version.ref = "testcontainers" }
+testcontainers-hivemq = { module = "org.testcontainers:testcontainers-hivemq", version.ref = "testcontainers" }
+testcontainers-influxdb = { module = "org.testcontainers:testcontainers-influxdb", version.ref = "testcontainers" }
+testcontainers-junitJupiter = { module = "org.testcontainers:testcontainers-junit-jupiter", version.ref = "testcontainers" }
 wiremock = { module = "org.wiremock:wiremock", version.ref = "wiremock" }
 
 [plugins]
