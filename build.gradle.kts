@@ -34,7 +34,10 @@ tasks.compileJava {
 
 dependencies {
     compileOnly(libs.jetbrains.annotations)
-    implementation(libs.metrics.influxdb)
+    implementation(libs.metrics.influxdb) {
+        // kafka-clients (and its transitive snappy-java, lz4-java) has critical CVEs and is not used by this extension
+        exclude(group = "org.apache.kafka", module = "kafka-clients")
+    }
     implementation(libs.commonsLang)
 }
 
