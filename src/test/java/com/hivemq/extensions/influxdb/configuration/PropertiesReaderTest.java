@@ -19,7 +19,6 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -33,48 +32,33 @@ class PropertiesReaderTest {
     void readPropertiesFromFile_file_null() {
         //noinspection DataFlowIssue
         assertThatThrownBy(() -> new PropertiesReader(null) {
-            @Override
-            public @NotNull String getFilename() {
-                return "test";
-            }
         }).isInstanceOf(NullPointerException.class);
     }
 
     @Test
     void readPropertiesFromFile_file_does_not_exist(final @TempDir @NotNull Path tempDir) {
-        final var propertiesReader = new PropertiesReader(tempDir.toFile()) {
-            @Override
-            public @NotNull String getFilename() {
-                return "test";
-            }
+        final var propertiesReader = new PropertiesReader(tempDir.resolve("test").toFile()) {
         };
         assertThat(propertiesReader.readPropertiesFromFile()).isFalse();
     }
 
     @Test
-    void readPropertiesFromFile_file_does_exist(final @TempDir @NotNull Path tempDir) throws IOException {
-        assertThat(tempDir.resolve("test").toFile().createNewFile()).isTrue();
+    void readPropertiesFromFile_file_does_exist(final @TempDir @NotNull Path tempDir) throws Exception {
+        final var file = tempDir.resolve("test");
+        assertThat(file.toFile().createNewFile()).isTrue();
 
-        final var propertiesReader = new PropertiesReader(tempDir.toFile()) {
-            @Override
-            public @NotNull String getFilename() {
-                return "test";
-            }
+        final var propertiesReader = new PropertiesReader(file.toFile()) {
         };
         assertThat(propertiesReader.readPropertiesFromFile()).isTrue();
     }
 
     @Test
-    void getProperty_key_null(final @TempDir @NotNull Path tempDir) throws IOException {
+    void getProperty_key_null(final @TempDir @NotNull Path tempDir) throws Exception {
         final var file = tempDir.resolve("test");
         assertThat(file.toFile().createNewFile()).isTrue();
         Files.write(file, List.of("key:value"));
 
-        final var propertiesReader = new PropertiesReader(tempDir.toFile()) {
-            @Override
-            public @NotNull String getFilename() {
-                return "test";
-            }
+        final var propertiesReader = new PropertiesReader(file.toFile()) {
         };
         assertThat(propertiesReader.readPropertiesFromFile()).isTrue();
         assertThat(propertiesReader.getProperty("key")).isEqualTo("value");
@@ -84,16 +68,12 @@ class PropertiesReaderTest {
     }
 
     @Test
-    void getProperty_key_doesnt_exist(final @TempDir @NotNull Path tempDir) throws IOException {
+    void getProperty_key_doesnt_exist(final @TempDir @NotNull Path tempDir) throws Exception {
         final var file = tempDir.resolve("test");
         assertThat(file.toFile().createNewFile()).isTrue();
         Files.write(file, List.of("key:value"));
 
-        final var propertiesReader = new PropertiesReader(tempDir.toFile()) {
-            @Override
-            public @NotNull String getFilename() {
-                return "test";
-            }
+        final var propertiesReader = new PropertiesReader(file.toFile()) {
         };
         assertThat(propertiesReader.readPropertiesFromFile()).isTrue();
         assertThat(propertiesReader.getProperty("key")).isEqualTo("value");
@@ -101,32 +81,24 @@ class PropertiesReaderTest {
     }
 
     @Test
-    void getProperty_key_exists(final @TempDir @NotNull Path tempDir) throws IOException {
+    void getProperty_key_exists(final @TempDir @NotNull Path tempDir) throws Exception {
         final var file = tempDir.resolve("test");
         assertThat(file.toFile().createNewFile()).isTrue();
         Files.write(file, List.of("key:value"));
 
-        final var propertiesReader = new PropertiesReader(tempDir.toFile()) {
-            @Override
-            public @NotNull String getFilename() {
-                return "test";
-            }
+        final var propertiesReader = new PropertiesReader(file.toFile()) {
         };
         assertThat(propertiesReader.readPropertiesFromFile()).isTrue();
         assertThat(propertiesReader.getProperty("key")).isEqualTo("value");
     }
 
     @Test
-    void getProperty_before_loading_properties(final @TempDir @NotNull Path tempDir) throws IOException {
+    void getProperty_before_loading_properties(final @TempDir @NotNull Path tempDir) throws Exception {
         final var file = tempDir.resolve("test");
         assertThat(file.toFile().createNewFile()).isTrue();
         Files.write(file, List.of("key:value"));
 
-        final var propertiesReader = new PropertiesReader(tempDir.toFile()) {
-            @Override
-            public @NotNull String getFilename() {
-                return "test";
-            }
+        final var propertiesReader = new PropertiesReader(file.toFile()) {
         };
         assertThat(propertiesReader.getProperty("key")).isNull();
     }

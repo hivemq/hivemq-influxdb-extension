@@ -22,14 +22,14 @@ This database can be used as the data source for a monitoring dashboard (like Gr
 Installing the extension for HiveMQ is very easy:
 
 . Download the extension from the {download-influxdb-extension}[HiveMQ website] and unzip the downloaded zip file.
-. In the folder `hivemq-influxdb-extension`, modify the `influxdb.properties` file to fit your needs.
+. In the folder `hivemq-influxdb-extension`, modify the `conf/config.properties` file to fit your needs.
 Check that the mandatory properties (host, port) are set
 . Copy the folder `hivemq-influxdb-extension` to your `<HIVEMQ_HOME>/extensions` folder
 . Done
 
 == Configuration
 
-The InfluxDB Monitoring extension uses its own configuration file `influxdb.properties`.
+The InfluxDB Monitoring extension uses its own configuration file `config.properties`.
 The extension won't start if this file is missing or the required properties are not set.
 
 === General Configuration
@@ -84,7 +84,7 @@ If you don't already have an InfluxDB instance set up, here is an instruction ho
 . Start an InfluxDB docker container with the command `docker run -p 8086:8086 -v $PWD:/var/lib/influxdb influxdb`.
 For more information about using InfluxDB with Docker visit the {influxdb-docker}[official Docker repository^] for InfluxDB
 . A local instance of InfluxDB should be running with the port for the database set to 8086
-. Create a database that matches the name set in the property `database` in `influxdb.properties`.
+. Create a database that matches the name set in the property `database` in `conf/config.properties`.
 For the default `database` value use the command `curl -G http://localhost:8086/query --data-urlencode "q=CREATE DATABASE hivemq"`
 . Done
 

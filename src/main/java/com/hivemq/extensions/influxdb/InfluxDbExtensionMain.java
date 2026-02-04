@@ -24,6 +24,7 @@ import com.hivemq.extension.sdk.api.parameter.ExtensionStartOutput;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStopInput;
 import com.hivemq.extension.sdk.api.parameter.ExtensionStopOutput;
 import com.hivemq.extension.sdk.api.services.Services;
+import com.hivemq.extensions.influxdb.configuration.ConfigResolver;
 import com.hivemq.extensions.influxdb.configuration.InfluxDbConfiguration;
 import com.izettle.metrics.influxdb.InfluxDbHttpSender;
 import com.izettle.metrics.influxdb.InfluxDbReporter;
@@ -74,7 +75,11 @@ public class InfluxDbExtensionMain implements ExtensionMain {
             final @NotNull ExtensionStartOutput extensionStartOutput) {
         try {
             final var extensionHomeFolder = extensionStartInput.getExtensionInformation().getExtensionHomeFolder();
-            final var configuration = new InfluxDbConfiguration(extensionHomeFolder);
+            final var configResolver = new ConfigResolver(extensionHomeFolder.toPath(),
+                    "InfluxDB Extension",
+                    "conf/config.properties",
+                    "influxdb.properties");
+            final var configuration = new InfluxDbConfiguration(configResolver.get().toFile());
             if (!configuration.readPropertiesFromFile()) {
                 extensionStartOutput.preventExtensionStartup("Could not read influxdb properties");
                 return;

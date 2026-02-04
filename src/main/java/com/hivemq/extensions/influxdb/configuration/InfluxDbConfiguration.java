@@ -60,8 +60,8 @@ public class InfluxDbConfiguration extends PropertiesReader {
     private static final @NotNull String ORGANIZATION = "organization";
 
 
-    public InfluxDbConfiguration(final @NotNull File configFilePath) {
-        super(configFilePath);
+    public InfluxDbConfiguration(final @NotNull File configFile) {
+        super(configFile);
     }
 
     /**
@@ -186,11 +186,6 @@ public class InfluxDbConfiguration extends PropertiesReader {
 
     public @Nullable String getOrganization() {
         return getProperty(ORGANIZATION);
-    }
-
-    @Override
-    public @NotNull String getFilename() {
-        return "influxdb.properties";
     }
 
     /**

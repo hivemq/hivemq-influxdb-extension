@@ -32,9 +32,9 @@ import org.testcontainers.utility.MountableFile;
 
 import static org.awaitility.Awaitility.await;
 
-@SuppressWarnings({"resource"})
+@SuppressWarnings({"resource", "SameParameterValue"})
 @Testcontainers
-public class InfluxDbExtensionIT {
+class InfluxDbExtensionIT {
 
     private static final @NotNull String INFLUXDB_DATABASE = "hivemq";
 
@@ -45,8 +45,8 @@ public class InfluxDbExtensionIT {
             new HiveMQContainer(OciImages.getImageName("hivemq/extensions/hivemq-influxdb-extension")
                     .asCompatibleSubstituteFor("hivemq/hivemq-ce")) //
                     .withNetwork(network)
-                    .withCopyToContainer(MountableFile.forClasspathResource("influxdb.properties"),
-                            "/opt/hivemq/extensions/hivemq-influxdb-extension/influxdb.properties")
+                    .withCopyToContainer(MountableFile.forClasspathResource("config.properties"),
+                            "/opt/hivemq/extensions/hivemq-influxdb-extension/conf/config.properties")
                     .withLogConsumer(outputFrame -> System.out.print("HIVEMQ: " + outputFrame.getUtf8String()))
                     .withEnv("HIVEMQ_DISABLE_STATISTICS", "true");
 
@@ -72,6 +72,36 @@ public class InfluxDbExtensionIT {
 
             await().until(() -> getMetricMax(influxDBClient, "com.hivemq.messages.incoming.publish.count") == 3);
             await().until(() -> getMetricMax(influxDBClient, "com.hivemq.messages.incoming.connect.count") == 1);
+        }
+    }
+
+    @Test
+    void configAtLegacyLocation_metricsAreForwardedToInfluxDB() {
+        final var legacyHivemq =
+                new HiveMQContainer(OciImages.getImageName("hivemq/extensions/hivemq-influxdb-extension")
+                        .asCompatibleSubstituteFor("hivemq/hivemq-ce")) //
+                        .withNetwork(network)
+                        .withCopyToContainer(MountableFile.forClasspathResource("config.properties"),
+                                "/opt/hivemq/extensions/hivemq-influxdb-extension/influxdb.properties")
+                        .withLogConsumer(outputFrame -> System.out.print("HIVEMQ: " + outputFrame.getUtf8String()))
+                        .withEnv("HIVEMQ_DISABLE_STATISTICS", "true");
+
+        try (legacyHivemq) {
+            legacyHivemq.start();
+            try (final var influxDBClient = InfluxDBClientFactory.create(influxDB.getUrl())) {
+                final var createDbQuery = new InfluxQLQuery("CREATE DATABASE \"%s\"".formatted(INFLUXDB_DATABASE), "");
+                influxDBClient.getInfluxQLQueryApi().query(createDbQuery);
+
+                final var mqttClient = Mqtt5Client.builder()
+                        .serverHost(legacyHivemq.getHost())
+                        .serverPort(legacyHivemq.getMqttPort())
+                        .buildBlocking();
+                mqttClient.connect();
+                mqttClient.publishWith().topic("my/topic1").send();
+                mqttClient.disconnect();
+
+                await().until(() -> getMetricMax(influxDBClient, "com.hivemq.messages.incoming.publish.count") == 1);
+            }
         }
     }
 
