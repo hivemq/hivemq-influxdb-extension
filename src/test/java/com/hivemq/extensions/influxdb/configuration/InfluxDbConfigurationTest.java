@@ -36,10 +36,15 @@ class InfluxDbConfigurationTest {
     private @NotNull InfluxDbConfiguration influxDbConfiguration;
     private @NotNull Path file;
 
+    @TempDir
+    private @NotNull Path tempDir;
+
     @BeforeEach
-    void setUp(final @TempDir @NotNull Path tempDir) {
-        influxDbConfiguration = new InfluxDbConfiguration(tempDir.toFile());
-        file = tempDir.resolve("influxdb.properties");
+    void setUp() throws Exception {
+        final var confDir = tempDir.resolve("conf");
+        Files.createDirectories(confDir);
+        file = confDir.resolve("config.properties");
+        influxDbConfiguration = new InfluxDbConfiguration(file.toFile());
     }
 
     @Test

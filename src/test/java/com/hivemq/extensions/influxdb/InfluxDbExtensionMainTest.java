@@ -39,17 +39,17 @@ class InfluxDbExtensionMainTest {
     private final @NotNull ExtensionStartOutput extensionStartOutput = mock();
 
     private @NotNull InfluxDbExtensionMain main;
-    private @NotNull Path file;
+
+    @TempDir
+    private @NotNull Path tempDir;
 
     @BeforeEach
-    void setUp(final @TempDir @NotNull Path tempDir) {
+    void setUp() {
         main = new InfluxDbExtensionMain();
 
         final var extensionInformation = mock(ExtensionInformation.class);
         when(extensionStartInput.getExtensionInformation()).thenReturn(extensionInformation);
         when(extensionStartInput.getExtensionInformation().getExtensionHomeFolder()).thenReturn(tempDir.toFile());
-
-        file = tempDir.resolve("influxdb.properties");
     }
 
     @Test
@@ -59,8 +59,18 @@ class InfluxDbExtensionMainTest {
     }
 
     @Test
-    void extensionStart_whenConfigurationFileNotValid_thenPreventStartup() throws IOException {
-        Files.write(file, List.of("host:localhost", "port:-3000"));
+    void extensionStart_whenLegacyConfigurationFileNotValid_thenPreventStartup() throws IOException {
+        Files.write(tempDir.resolve("influxdb.properties"), List.of("host:localhost", "port:-3000"));
+
+        main.extensionStart(extensionStartInput, extensionStartOutput);
+        verify(extensionStartOutput).preventExtensionStartup(anyString());
+    }
+
+    @Test
+    void extensionStart_whenConfFolderConfigurationFileNotValid_thenPreventStartup() throws IOException {
+        final var confDir = tempDir.resolve("conf");
+        Files.createDirectories(confDir);
+        Files.write(confDir.resolve("config.properties"), List.of("host:localhost", "port:-3000"));
 
         main.extensionStart(extensionStartInput, extensionStartOutput);
         verify(extensionStartOutput).preventExtensionStartup(anyString());
