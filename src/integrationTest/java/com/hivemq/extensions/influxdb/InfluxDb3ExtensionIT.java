@@ -18,6 +18,7 @@ package com.hivemq.extensions.influxdb;
 import com.hivemq.client.mqtt.mqtt5.Mqtt5Client;
 import io.github.sgtsilvio.gradle.oci.junit.jupiter.OciImages;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
@@ -64,6 +65,11 @@ class InfluxDb3ExtensionIT {
                     .withNetwork(network)
                     .withNetworkAliases("influxdb")
                     .withLogConsumer(outputFrame -> System.out.print("INFLUXDB: " + outputFrame.getUtf8String()));
+
+    @AfterEach
+    void tearDown() {
+        network.close();
+    }
 
     @Test
     void testMetricsAreForwardedToInfluxDB() {

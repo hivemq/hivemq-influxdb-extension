@@ -22,6 +22,7 @@ import com.influxdb.client.domain.InfluxQLQuery;
 import io.github.sgtsilvio.gradle.oci.junit.jupiter.OciImages;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.InfluxDBContainer;
 import org.testcontainers.containers.Network;
@@ -56,6 +57,11 @@ class InfluxDb1ExtensionIT {
                     .withNetwork(network)
                     .withNetworkAliases("influxdb")
                     .withLogConsumer(outputFrame -> System.out.print("INFLUXDB: " + outputFrame.getUtf8String()));
+
+    @AfterEach
+    void tearDown() {
+        network.close();
+    }
 
     @Test
     void testMetricsAreForwardedToInfluxDB() {
