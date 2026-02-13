@@ -24,6 +24,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.InfluxDBContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.hivemq.HiveMQContainer;
@@ -41,6 +43,8 @@ class InfluxDb2ExtensionIT {
     private static final @NotNull String INFLUXDB_ORGANIZATION = "test-org";
     private static final @NotNull String INFLUXDB_BUCKET = "hivemq";
 
+    private static final @NotNull Logger LOG = LoggerFactory.getLogger(InfluxDb2ExtensionIT.class);
+
     private final @NotNull Network network = Network.newNetwork();
 
     @Container
@@ -50,7 +54,7 @@ class InfluxDb2ExtensionIT {
                     .withNetwork(network)
                     .withCopyToContainer(MountableFile.forClasspathResource("config-v2.properties"),
                             "/opt/hivemq/extensions/hivemq-influxdb-extension/conf/config.properties")
-                    .withLogConsumer(outputFrame -> System.out.print("HIVEMQ: " + outputFrame.getUtf8String()))
+                    .withLogConsumer(outputFrame -> LOG.info("HIVEMQ: {}", outputFrame.getUtf8String()))
                     .withEnv("HIVEMQ_DISABLE_STATISTICS", "true");
 
     @Container
@@ -60,7 +64,7 @@ class InfluxDb2ExtensionIT {
                     .withBucket(INFLUXDB_BUCKET)
                     .withNetwork(network)
                     .withNetworkAliases("influxdb")
-                    .withLogConsumer(outputFrame -> System.out.print("INFLUXDB: " + outputFrame.getUtf8String()));
+                    .withLogConsumer(outputFrame -> LOG.info("INFLUXDB: {}", outputFrame.getUtf8String()));
 
     @AfterEach
     void tearDown() {
