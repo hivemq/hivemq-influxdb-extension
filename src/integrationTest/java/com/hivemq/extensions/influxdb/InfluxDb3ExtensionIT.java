@@ -20,6 +20,8 @@ import io.github.sgtsilvio.gradle.oci.junit.jupiter.OciImages;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.wait.strategy.Wait;
@@ -44,6 +46,8 @@ class InfluxDb3ExtensionIT {
     private static final int INFLUXDB_PORT = 8181;
     private static final @NotNull String INFLUXDB_DATABASE = "hivemq";
 
+    private static final @NotNull Logger LOG = LoggerFactory.getLogger(InfluxDb3ExtensionIT.class);
+
     private final @NotNull Network network = Network.newNetwork();
 
     @Container
@@ -53,7 +57,7 @@ class InfluxDb3ExtensionIT {
                     .withNetwork(network)
                     .withCopyToContainer(MountableFile.forClasspathResource("config-v3.properties"),
                             "/opt/hivemq/extensions/hivemq-influxdb-extension/conf/config.properties")
-                    .withLogConsumer(outputFrame -> System.out.print("HIVEMQ: " + outputFrame.getUtf8String()))
+                    .withLogConsumer(outputFrame -> LOG.info("HIVEMQ: {}", outputFrame.getUtf8String()))
                     .withEnv("HIVEMQ_DISABLE_STATISTICS", "true");
 
     @Container
@@ -64,7 +68,7 @@ class InfluxDb3ExtensionIT {
                     .waitingFor(Wait.forHttp("/health").forPort(INFLUXDB_PORT))
                     .withNetwork(network)
                     .withNetworkAliases("influxdb")
-                    .withLogConsumer(outputFrame -> System.out.print("INFLUXDB: " + outputFrame.getUtf8String()));
+                    .withLogConsumer(outputFrame -> LOG.info("INFLUXDB: {}", outputFrame.getUtf8String()));
 
     @AfterEach
     void tearDown() {
@@ -96,7 +100,7 @@ class InfluxDb3ExtensionIT {
             final var request = HttpRequest.newBuilder().uri(uri).GET().build();
             final var response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() != 200) {
-                System.out.printf("Failed to get metric %s: status code %d%n%s%n",
+                LOG.error("Failed to get metric {}: status code {}\n{}",
                         metric,
                         response.statusCode(),
                         response.body());
@@ -104,12 +108,12 @@ class InfluxDb3ExtensionIT {
             }
             final var lines = response.body().strip().split("\n");
             if (lines.length < 2) {
-                System.out.printf("Failed to get metric %s: Unexpected response%n%s%n", metric, response.body());
+                LOG.error("Failed to get metric {}: Unexpected response body format\n{}", metric, response.body());
                 return 0;
             }
             return (long) Double.parseDouble(lines[1].strip());
         } catch (final Exception e) {
-            System.out.printf("Failed to get metric %s: %s%n", metric, e.getMessage());
+            LOG.error("Failed to get metric {}: {}", metric, e.getMessage());
             return 0;
         }
     }
