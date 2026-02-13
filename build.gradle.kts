@@ -134,6 +134,9 @@ testing {
                 imageDependencies("v2") {
                     runtime("library:influxdb:2.8.0").name("influxdb").tag("v2")
                 }
+                imageDependencies("v3") {
+                    runtime("library:influxdb:3.8.0-core").name("influxdb").tag("v3")
+                }
             }
         }
     }
@@ -159,8 +162,10 @@ tasks.withType<AbstractArchiveTask>().configureEach {
 
 tasks.withType<JavaCompile>().configureEach {
     // ensure consistent compilation across different JDK versions
-    options.compilerArgs.addAll(listOf(
-        // include parameter names for reflection (improves consistency)
-        "-parameters"
-    ))
+    options.compilerArgs.addAll(
+        listOf(
+            // include parameter names for reflection (improves consistency)
+            "-parameters"
+        )
+    )
 }
