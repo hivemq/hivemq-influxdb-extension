@@ -32,9 +32,9 @@ import org.testcontainers.utility.MountableFile;
 
 import static org.awaitility.Awaitility.await;
 
-@SuppressWarnings({"resource", "SameParameterValue"})
 @Testcontainers
-class InfluxDbExtensionIT {
+@SuppressWarnings({"resource", "SameParameterValue"})
+class InfluxDb1ExtensionIT {
 
     private static final @NotNull String INFLUXDB_DATABASE = "hivemq";
 
@@ -52,9 +52,10 @@ class InfluxDbExtensionIT {
 
     @Container
     private final @NotNull InfluxDBContainer<?> influxDB =
-            new InfluxDBContainer<>(OciImages.getImageName("influxdb")).withAuthEnabled(false)
+            new InfluxDBContainer<>(OciImages.getImageName("influxdb:v1")).withAuthEnabled(false)
                     .withNetwork(network)
-                    .withNetworkAliases("influxdb");
+                    .withNetworkAliases("influxdb")
+                    .withLogConsumer(outputFrame -> System.out.print("INFLUXDB: " + outputFrame.getUtf8String()));
 
     @Test
     void testMetricsAreForwardedToInfluxDB() {
