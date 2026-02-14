@@ -93,7 +93,7 @@ class InfluxDb2ExtensionIT {
         }
     }
 
-    private long getMetricMax(final @NotNull InfluxDBClient client, final @NotNull String metric) {
+    private static long getMetricMax(final @NotNull InfluxDBClient client, final @NotNull String metric) {
         final var flux = """
                 from(bucket: "%s")
                     |> range(start: -1h)

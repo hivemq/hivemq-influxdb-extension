@@ -36,8 +36,6 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -46,8 +44,6 @@ import java.util.concurrent.TimeUnit;
  * @author Michael Walter
  */
 public class InfluxDbExtensionMain implements ExtensionMain {
-
-    private static final @NotNull Logger LOG = LoggerFactory.getLogger(InfluxDbExtensionMain.class);
 
     private static final @NotNull Set<String> METER_FIELDS =
             Set.of("count", "m1_rate", "m5_rate", "m15_rate", "mean_rate");
@@ -67,6 +63,8 @@ public class InfluxDbExtensionMain implements ExtensionMain {
             "m15_rate",
             "mean_rate");
 
+    private static final @NotNull Logger LOG = LoggerFactory.getLogger(InfluxDbExtensionMain.class);
+
     private @Nullable ScheduledReporter reporter;
 
     @Override
@@ -81,17 +79,17 @@ public class InfluxDbExtensionMain implements ExtensionMain {
                     "influxdb.properties");
             final var configuration = new InfluxDbConfiguration(configResolver.get().toFile());
             if (!configuration.readPropertiesFromFile()) {
-                extensionStartOutput.preventExtensionStartup("Could not read influxdb properties");
+                extensionStartOutput.preventExtensionStartup("Could not read InfluxDB properties");
                 return;
             }
             if (!configuration.validateConfiguration()) {
-                extensionStartOutput.preventExtensionStartup("At least one mandatory property not set");
+                extensionStartOutput.preventExtensionStartup("At least one mandatory property not set or invalid");
                 return;
             }
             final var sender = setupSender(configuration);
             if (sender == null) {
                 extensionStartOutput.preventExtensionStartup(
-                        "Couldn't create an influxdb sender. Please check that the configuration is correct");
+                        "Could not create an InfluxDB sender, please check your configuration");
                 return;
             }
             final var metricRegistry = Services.metricRegistry();
@@ -112,63 +110,23 @@ public class InfluxDbExtensionMain implements ExtensionMain {
         }
     }
 
-    private @NotNull ScheduledReporter setupReporter(
-            final @NotNull MetricRegistry metricRegistry,
-            final @NotNull InfluxDbSender sender,
-            final @NotNull InfluxDbConfiguration configuration) {
-        Objects.requireNonNull(metricRegistry, "MetricRegistry for influxdb must not be null");
-        Objects.requireNonNull(sender, "InfluxDbSender for influxdb must not be null");
-        Objects.requireNonNull(configuration, "Configuration for influxdb must not be null");
-        final var tags = configuration.getTags();
-        return InfluxDbReporter.forRegistry(metricRegistry)
-                .withTags(tags)
-                .convertRatesTo(TimeUnit.SECONDS)
-                .convertDurationsTo(TimeUnit.MILLISECONDS)
-                .filter(MetricFilter.ALL)
-                .groupGauges(false)
-                .skipIdleMetrics(false)
-                .includeMeterFields(METER_FIELDS)
-                .includeTimerFields(TIMER_FIELDS)
-                .build(sender);
-    }
-
-    private @Nullable InfluxDbSender setupSender(final @NotNull InfluxDbConfiguration configuration) {
-        Objects.requireNonNull(configuration, "Configuration for influxdb must not be null");
+    private static @Nullable InfluxDbSender setupSender(final @NotNull InfluxDbConfiguration configuration) {
+        Objects.requireNonNull(configuration, "Configuration for InfluxDB must not be null");
+        final var mode = configuration.getMode();
+        final var protocol = configuration.getProtocolOrDefault("cloud".equals(mode) ? "https" : "http");
         final var host = configuration.getHost();
         final var port = configuration.getPort();
         final var database = configuration.getDatabase();
         final var auth = configuration.getAuth();
         final var connectTimeout = configuration.getConnectTimeout();
         final var prefix = configuration.getPrefix();
-        final var mode = configuration.getMode();
-
-        // cloud / v2
         final var bucket = configuration.getBucket();
         final var organization = configuration.getOrganization();
-
-        // Determine effective version
-        var version = configuration.getVersion();
-        if (version == null) {
-            if ("cloud".equals(mode)) {
-                version = 2;
-            } else {
-                version = 1;
-            }
-            if (configuration.isVersionConfigured()) {
-                LOG.warn("InfluxDB version configuration is invalid. Falling back to auto-detected v{} based on " +
-                        "mode={}. Please set a valid 'version' (1, 2, or 3) in your configuration.", version, mode);
-            } else {
-                LOG.warn("InfluxDB version not specified. Auto-detected as v{} based on mode={}. " +
-                        "Please add 'version={}' to your configuration.", version, mode, version);
-            }
-        }
-
-        InfluxDbSender sender = null;
         try {
+            final var version = configuration.getVersion();
             switch (version) {
                 case 1:
-                    sender = setupV1Sender(configuration, mode, host, port, database, auth, connectTimeout, prefix);
-                    break;
+                    return setupV1Sender(configuration, mode, host, port, database, auth, connectTimeout, prefix);
                 case 2:
                     LOG.info("Creating InfluxDB v2 sender for {}, bucket {}, organization {}",
                             host,
@@ -177,8 +135,7 @@ public class InfluxDbExtensionMain implements ExtensionMain {
                     Objects.requireNonNull(bucket, "Bucket name must be defined for InfluxDB v2");
                     Objects.requireNonNull(organization, "Organization must be defined for InfluxDB v2");
                     Objects.requireNonNull(auth, "Auth token must be defined for InfluxDB v2");
-                    sender = new InfluxDbCloudSender(
-                            configuration.getProtocolOrDefault("cloud".equals(mode) ? "https" : "http"),
+                    return new InfluxDbCloudSender(protocol,
                             host,
                             port,
                             auth,
@@ -188,11 +145,9 @@ public class InfluxDbExtensionMain implements ExtensionMain {
                             prefix,
                             organization,
                             bucket);
-                    break;
                 case 3:
                     LOG.info("Creating InfluxDB v3 sender for {}:{}, database {}", host, port, database);
-                    sender = new InfluxDbV3Sender(
-                            configuration.getProtocolOrDefault("cloud".equals(mode) ? "https" : "http"),
+                    return new InfluxDbV3Sender(protocol,
                             host,
                             port,
                             auth,
@@ -201,22 +156,19 @@ public class InfluxDbExtensionMain implements ExtensionMain {
                             connectTimeout,
                             prefix,
                             database);
-                    break;
-                default:
-                    LOG.error("Unsupported InfluxDB version: {}", version);
             }
         } catch (final Exception ex) {
             LOG.error("Not able to start InfluxDB sender, please check your configuration: {}", ex.getMessage());
             LOG.debug("Original Exception: ", ex);
         }
-        return sender;
+        return null;
     }
 
-    private @Nullable InfluxDbSender setupV1Sender(
+    private static @Nullable InfluxDbSender setupV1Sender(
             final @NotNull InfluxDbConfiguration configuration,
             final @NotNull String mode,
-            final @Nullable String host,
-            final @Nullable Integer port,
+            final @NotNull String host,
+            final int port,
             final @NotNull String database,
             final @Nullable String auth,
             final int connectTimeout,
@@ -240,7 +192,7 @@ public class InfluxDbExtensionMain implements ExtensionMain {
                 LOG.info("Creating InfluxDB v1 UDP sender for {}:{}, database {}", host, port, database);
                 return new InfluxDbUdpSender(host, port, connectTimeout, database, prefix);
             case "cloud":
-                LOG.warn("mode=cloud with version=1 is unusual. Falling back to HTTP sender.");
+                LOG.warn("InfluxDB v1 does not support cloud sender, falling back to HTTP sender");
                 return new InfluxDbHttpSender(configuration.getProtocolOrDefault("https"),
                         host,
                         port,
@@ -251,14 +203,28 @@ public class InfluxDbExtensionMain implements ExtensionMain {
                         connectTimeout,
                         prefix);
             default:
-                LOG.error("Unsupported mode '{}' for InfluxDB v1. Supported modes: http, tcp, udp", mode);
+                LOG.error("Unsupported mode '{}' for InfluxDB v1 (supported modes: http, tcp, udp)", mode);
                 return null;
         }
     }
 
-    public static Set<String> newHashSet(final String @NotNull ... elements) {
-        final var set = new HashSet<String>();
-        Collections.addAll(set, elements);
-        return set;
+    private static @NotNull ScheduledReporter setupReporter(
+            final @NotNull MetricRegistry metricRegistry,
+            final @NotNull InfluxDbSender sender,
+            final @NotNull InfluxDbConfiguration configuration) {
+        Objects.requireNonNull(metricRegistry, "MetricRegistry for InfluxDB must not be null");
+        Objects.requireNonNull(sender, "InfluxDbSender for InfluxDB must not be null");
+        Objects.requireNonNull(configuration, "Configuration for InfluxDB must not be null");
+        final var tags = configuration.getTags();
+        return InfluxDbReporter.forRegistry(metricRegistry)
+                .withTags(tags)
+                .convertRatesTo(TimeUnit.SECONDS)
+                .convertDurationsTo(TimeUnit.MILLISECONDS)
+                .filter(MetricFilter.ALL)
+                .groupGauges(false)
+                .skipIdleMetrics(false)
+                .includeMeterFields(METER_FIELDS)
+                .includeTimerFields(TIMER_FIELDS)
+                .build(sender);
     }
 }

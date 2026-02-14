@@ -60,7 +60,7 @@ class InfluxDbExtensionMainTest {
 
     @Test
     void extensionStart_whenLegacyConfigurationFileNotValid_thenPreventStartup() throws IOException {
-        Files.write(tempDir.resolve("influxdb.properties"), List.of("host:localhost", "port:-3000"));
+        Files.write(tempDir.resolve("influxdb.properties"), List.of("host=localhost", "port=-3000"));
 
         main.extensionStart(extensionStartInput, extensionStartOutput);
         verify(extensionStartOutput).preventExtensionStartup(anyString());
@@ -70,7 +70,7 @@ class InfluxDbExtensionMainTest {
     void extensionStart_whenConfFolderConfigurationFileNotValid_thenPreventStartup() throws IOException {
         final var confDir = tempDir.resolve("conf");
         Files.createDirectories(confDir);
-        Files.write(confDir.resolve("config.properties"), List.of("host:localhost", "port:-3000"));
+        Files.write(confDir.resolve("config.properties"), List.of("host=localhost", "port=-3000"));
 
         main.extensionStart(extensionStartInput, extensionStartOutput);
         verify(extensionStartOutput).preventExtensionStartup(anyString());

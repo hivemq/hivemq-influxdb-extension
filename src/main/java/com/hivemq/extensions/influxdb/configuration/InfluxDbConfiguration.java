@@ -28,40 +28,35 @@ import java.util.Objects;
 import java.util.Properties;
 
 /**
- * Reads a property file containing influxdb properties
+ * Reads a property file containing InfluxDB properties
  * and provides some utility methods for working with {@link Properties}.
  *
- * @author Christoph Schäbel
  * @author Michael Walter
  */
 public class InfluxDbConfiguration extends PropertiesReader {
 
+    private static final @NotNull String PROPERTY_HOST = "host";
+    private static final @NotNull String PROPERTY_PORT = "port";
+    private static final @NotNull String PROPERTY_MODE = "mode";
+    private static final @NotNull String PROPERTY_DATABASE = "database";
+    private static final @NotNull String PROPERTY_REPORTING_INTERVAL = "reportingInterval";
+    private static final @NotNull String PROPERTY_CONNECT_TIMEOUT = "connectTimeout";
+    private static final @NotNull String PROPERTY_PROTOCOL = "protocol";
+    private static final @NotNull String PROPERTY_PREFIX = "prefix";
+    private static final @NotNull String PROPERTY_AUTH = "auth";
+    private static final @NotNull String PROPERTY_TAGS = "tags";
+    private static final @NotNull String PROPERTY_BUCKET = "bucket";
+    private static final @NotNull String PROPERTY_ORGANIZATION = "organization";
+    private static final @NotNull String PROPERTY_VERSION = "version";
+
+    private static final @NotNull String DEFAULT_MODE = "http";
+    private static final @NotNull String DEFAULT_DATABASE = "hivemq";
+    private static final int DEFAULT_REPORTING_INTERVAL = 1;
+    private static final int DEFAULT_CONNECT_TIMEOUT = 5000;
+    private static final @NotNull String DEFAULT_PREFIX = "";
+    private static final @NotNull Map<String, String> DEFAULT_TAGS = Map.of();
+
     private static final @NotNull Logger LOG = LoggerFactory.getLogger(InfluxDbConfiguration.class);
-
-    private static final @NotNull String HOST = "host";
-    private static final @NotNull String PORT = "port";
-    private static final @NotNull String MODE = "mode";
-    private static final @NotNull String MODE_DEFAULT = "http";
-    private static final @NotNull String PROTOCOL = "protocol";
-    private static final @NotNull String REPORTING_INTERVAL = "reportingInterval";
-    private static final int REPORTING_INTERVAL_DEFAULT = 1;
-    private static final @NotNull String PREFIX = "prefix";
-    private static final @NotNull String PREFIX_DEFAULT = "";
-    private static final @NotNull String DATABASE = "database";
-    private static final @NotNull String DATABASE_DEFAULT = "hivemq";
-    private static final @NotNull String CONNECT_TIMEOUT = "connectTimeout";
-    private static final int CONNECT_TIMEOUT_DEFAULT = 5000;
-    private static final @NotNull String AUTH = "auth";
-    private static final @NotNull String TAGS = "tags";
-    private static final @NotNull HashMap<String, String> TAGS_DEFAULT = new HashMap<>();
-
-    //InfluxDB Cloud
-    private static final @NotNull String BUCKET = "bucket";
-    private static final @NotNull String ORGANIZATION = "organization";
-
-    // InfluxDB version
-    private static final @NotNull String VERSION = "version";
-
 
     public InfluxDbConfiguration(final @NotNull File configFile) {
         super(configFile);
@@ -73,30 +68,43 @@ public class InfluxDbConfiguration extends PropertiesReader {
      * @return <b>true</b> if all mandatory properties exist, else <b>false</b>.
      */
     public boolean validateConfiguration() {
-        int countError = 0;
-        countError += checkMandatoryProperty(HOST);
-        countError += checkMandatoryProperty(PORT);
-        if (countError != 0) {
+        var errorCount = 0;
+        errorCount += checkMandatoryProperty(PROPERTY_HOST);
+        errorCount += checkMandatoryProperty(PROPERTY_PORT);
+        if (errorCount != 0) {
             return false;
         }
+        // check if host wasn't configured
+        final var host = getProperty(PROPERTY_HOST);
+        if ("<INFLUXDB IP>".equals(host) || "--INFLUX-DB-IP--".equals(host)) {
+            errorCount++;
+        }
         // check for valid port value
-        final var port = getProperty(PORT);
-        try {
-            final var intPort = Integer.parseInt(port);
-            if (intPort < 0 || intPort > 65535) {
-                LOG.error("Value for mandatory InfluxDB property {} is not in valid port range.", PORT);
-                countError++;
+        final var port = validateIntProperty(PROPERTY_PORT, -1);
+        if (port < 0 || port > 65535) {
+            LOG.error("Value for mandatory InfluxDB property '{}' is not in valid port range", PROPERTY_PORT);
+            errorCount++;
+        }
+        // check for valid version value
+        if (getProperty(PROPERTY_VERSION) != null) {
+            final var version = validateIntProperty(PROPERTY_VERSION, -1);
+            if (version < 1 || version > 3) {
+                LOG.error("Unsupported InfluxDB version {} (supported versions: 1, 2, 3)", version);
+                errorCount++;
             }
-        } catch (final NumberFormatException e) {
-            LOG.error("Value for mandatory InfluxDB property {} is not a number.", PORT);
-            countError++;
         }
-        // check if host is still --INFLUX-DB-IP--
-        final var host = getProperty(HOST);
-        if ("--INFLUX-DB-IP--".equals(host)) {
-            countError++;
+        // check for valid cloud configuration
+        if ("cloud".equals(getProperty(PROPERTY_MODE))) {
+            var cloudError = 0;
+            cloudError += checkMandatoryProperty(PROPERTY_AUTH);
+            cloudError += checkMandatoryProperty(PROPERTY_BUCKET);
+            cloudError += checkMandatoryProperty(PROPERTY_ORGANIZATION);
+            if (cloudError > 0) {
+                LOG.warn("Mandatory properties for InfluxDB mode 'cloud' are not configured");
+            }
+            errorCount += cloudError;
         }
-        return countError == 0;
+        return errorCount == 0;
     }
 
     /**
@@ -106,50 +114,43 @@ public class InfluxDbConfiguration extends PropertiesReader {
      * @return 0 if property exists, else 1.
      */
     private int checkMandatoryProperty(final @NotNull String property) {
-        Objects.requireNonNull(property, "Mandatory property must not be null");
+        Objects.requireNonNull(property, "Value for mandatory InfluxDB property is not defined");
         final var value = getProperty(property);
         if (value == null) {
-            LOG.error("Mandatory property {} is not set.", property);
+            LOG.error("Value for mandatory InfluxDB property '{}' is not defined", property);
             return 1;
         }
         return 0;
     }
 
     public @NotNull String getMode() {
-        return validateStringProperty(MODE, MODE_DEFAULT);
+        return validateStringProperty(PROPERTY_MODE, DEFAULT_MODE);
     }
 
-    public @Nullable String getHost() {
-        return getProperty(HOST);
+    public @NotNull String getHost() {
+        return Objects.requireNonNullElse(getProperty(PROPERTY_HOST), "");
     }
 
     public @NotNull String getDatabase() {
-        return validateStringProperty(DATABASE, DATABASE_DEFAULT);
+        return validateStringProperty(PROPERTY_DATABASE, DEFAULT_DATABASE);
     }
 
-    public @Nullable Integer getPort() {
-        final int port;
-        try {
-            port = Integer.parseInt(getProperty(PORT));
-        } catch (final NumberFormatException e) {
-            LOG.error("Value for {} is not a number", PORT);
-            return null;
-        }
-        return port;
+    public int getPort() {
+        return validateIntProperty(PROPERTY_PORT, 0);
     }
 
     public int getReportingInterval() {
-        return validateIntProperty(REPORTING_INTERVAL, REPORTING_INTERVAL_DEFAULT);
+        return validateIntProperty(PROPERTY_REPORTING_INTERVAL, DEFAULT_REPORTING_INTERVAL);
     }
 
     public int getConnectTimeout() {
-        return validateIntProperty(CONNECT_TIMEOUT, CONNECT_TIMEOUT_DEFAULT);
+        return validateIntProperty(PROPERTY_CONNECT_TIMEOUT, DEFAULT_CONNECT_TIMEOUT);
     }
 
     public @NotNull String getProtocolOrDefault(final @NotNull String defaultProtocol) {
-        final var protocol = getProperty(PROTOCOL);
+        final var protocol = getProperty(PROPERTY_PROTOCOL);
         if (protocol == null) {
-            LOG.warn("No protocol configured for InfluxDb in mode '{}', using default: '{}'",
+            LOG.warn("No protocol configured for InfluxDB in mode '{}', using default '{}'",
                     getMode(),
                     defaultProtocol);
             return defaultProtocol;
@@ -158,24 +159,24 @@ public class InfluxDbConfiguration extends PropertiesReader {
     }
 
     public @NotNull String getPrefix() {
-        return validateStringProperty(PREFIX, PREFIX_DEFAULT);
+        return validateStringProperty(PROPERTY_PREFIX, DEFAULT_PREFIX);
     }
 
     public @Nullable String getAuth() {
-        return getProperty(AUTH);
+        return getProperty(PROPERTY_AUTH);
     }
 
     public @NotNull Map<String, String> getTags() {
-        final var tags = getProperty(TAGS);
+        final var tags = getProperty(PROPERTY_TAGS);
         if (tags == null) {
-            return TAGS_DEFAULT;
+            return DEFAULT_TAGS;
         }
         final var split = StringUtils.splitPreserveAllTokens(tags, ";");
         final var tagMap = new HashMap<String, String>();
         for (final var tag : split) {
             final var tagPair = StringUtils.split(tag, "=");
             if (tagPair.length != 2 || tagPair[0].isEmpty() || tagPair[1].isEmpty()) {
-                LOG.warn("Invalid tag format {} for InfluxDB", tag);
+                LOG.warn("Invalid tag format '{}' for InfluxDB", tag);
                 continue;
             }
             tagMap.put(tagPair[0], tagPair[1]);
@@ -184,42 +185,31 @@ public class InfluxDbConfiguration extends PropertiesReader {
     }
 
     public @Nullable String getBucket() {
-        return getProperty(BUCKET);
+        return getProperty(PROPERTY_BUCKET);
     }
 
     public @Nullable String getOrganization() {
-        return getProperty(ORGANIZATION);
-    }
-
-    /**
-     * Check if the version property was explicitly set in the configuration (even if invalid).
-     *
-     * @return {@code true} if the version property has a value, {@code false} if absent or empty.
-     */
-    public boolean isVersionConfigured() {
-        return getProperty(VERSION) != null;
+        return getProperty(PROPERTY_ORGANIZATION);
     }
 
     /**
      * Get the configured InfluxDB version.
      *
-     * @return the configured version (1, 2, or 3), or {@code null} if not specified or invalid.
+     * @return the configured or auto-detected version (1, 2, or 3)
      */
-    public @Nullable Integer getVersion() {
-        final var value = getProperty(VERSION);
-        if (value == null) {
-            return null;
+    public int getVersion() {
+        final var value = getProperty(PROPERTY_VERSION);
+        if (value != null) {
+            return validateIntProperty(PROPERTY_VERSION, 1);
         }
-        try {
-            final int version = Integer.parseInt(value);
-            if (version < 1 || version > 3) {
-                LOG.error("Unsupported InfluxDB version: {}. Supported versions: 1, 2, 3", version);
-                return null;
-            }
-            return version;
-        } catch (final NumberFormatException e) {
-            LOG.error("Value for '{}' is not a number: {}", VERSION, value);
-            return null;
+        LOG.warn("InfluxDB version not specified, please add a valid version to your configuration");
+        final var mode = getMode();
+        if ("cloud".equals(mode)) {
+            LOG.info("Auto-detected as v2 based on mode 'cloud'");
+            return 2;
+        } else {
+            LOG.info("Auto-detected as v1 based on mode '{}'", mode);
+            return 1;
         }
     }
 
@@ -237,7 +227,7 @@ public class InfluxDbConfiguration extends PropertiesReader {
         final var value = getProperty(key);
         if (value == null) {
             if (!defaultValue.isEmpty()) {
-                LOG.warn("No '{}' configured for InfluxDb, using default: {}", key, defaultValue);
+                LOG.warn("No '{}' configured for InfluxDB, using default {}", key, defaultValue);
             }
             return defaultValue;
         }
@@ -254,28 +244,26 @@ public class InfluxDbConfiguration extends PropertiesReader {
      * @return the actual value of the property if it is set and valid, else the <b>defaultValue</b>
      */
     private int validateIntProperty(final @NotNull String key, final int defaultValue) {
+        Objects.requireNonNull(properties, "No properties loaded");
         Objects.requireNonNull(key, "Key to fetch property must not be null");
         final var value = properties.getProperty(key);
         if (value == null) {
-            LOG.warn("No '{}' configured for InfluxDb, using default: {}", key, defaultValue);
+            LOG.warn("No InfluxDB property '{}' configured, using default {}", key, defaultValue);
             return defaultValue;
         }
         final int valueAsInt;
         try {
             valueAsInt = Integer.parseInt(value);
         } catch (final NumberFormatException e) {
-            LOG.warn("Value for InfluxDB property '{}' is not a number, original value {}. Using default: {}",
-                    key,
-                    value,
-                    defaultValue);
+            LOG.warn("Value {} for InfluxDB property '{}' is not a number, using default {}", value, key, defaultValue);
             return defaultValue;
         }
         if (valueAsInt == 0) {
-            LOG.warn("Value for InfluxDB property '{}' can't be zero. Using default: {}", key, defaultValue);
+            LOG.warn("Value for InfluxDB property '{}' can't be zero, using default {}", key, defaultValue);
             return defaultValue;
         }
         if (valueAsInt < 0) {
-            LOG.warn("Value for InfluxDB property '{}' can't be negative. Using default: {}", key, defaultValue);
+            LOG.warn("Value for InfluxDB property '{}' can't be negative, using default {}", key, defaultValue);
             return defaultValue;
         }
         return valueAsInt;

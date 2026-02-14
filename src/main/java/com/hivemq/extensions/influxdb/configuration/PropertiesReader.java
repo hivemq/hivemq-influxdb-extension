@@ -31,7 +31,7 @@ import java.util.Properties;
  *
  * @author Michael Walter
  */
-public abstract class PropertiesReader {
+abstract class PropertiesReader {
 
     private static final @NotNull Logger LOG = LoggerFactory.getLogger(PropertiesReader.class);
 
@@ -91,5 +91,4 @@ public abstract class PropertiesReader {
             properties.load(in);
         }
     }
-
 }

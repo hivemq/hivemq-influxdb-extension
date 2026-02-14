@@ -29,8 +29,6 @@ import java.util.zip.GZIPOutputStream;
 
 /**
  * Sender for InfluxDB Cloud.
- *
- * @author Simon Baier
  */
 public class InfluxDbCloudSender extends InfluxDbHttpSender {
 
@@ -58,7 +56,7 @@ public class InfluxDbCloudSender extends InfluxDbHttpSender {
         final var queryPrecision = String.format("precision=%s", TimeUtils.toTimePrecision(timePrecision));
         final var orgParameter = String.format("org=%s", URLEncoder.encode(organization, StandardCharsets.UTF_8));
         final var bucketParameter = String.format("bucket=%s", URLEncoder.encode(bucket, StandardCharsets.UTF_8));
-        this.url = new URL(endpoint + "?" + queryPrecision + "&" + orgParameter + "&" + bucketParameter);
+        this.url = new URL(String.format("%s?%s&%s&%s", endpoint, queryPrecision, orgParameter, bucketParameter));
     }
 
     @Override
@@ -75,16 +73,13 @@ public class InfluxDbCloudSender extends InfluxDbHttpSender {
             gzipOutputStream.flush();
             out.flush();
         }
-        // check if non 2XX response code
+        // check for non 2xx response code
         final var responseCode = con.getResponseCode();
         if (responseCode / 100 != 2) {
-            throw new IOException("Server returned HTTP response code: " +
-                    responseCode +
-                    " for URL: " +
-                    url +
-                    " with content :'" +
-                    con.getResponseMessage() +
-                    "'");
+            throw new IOException(String.format("Server returned HTTP response code %d for URL '%s' with content: %s",
+                    responseCode,
+                    url,
+                    con.getResponseMessage()));
         }
         return responseCode;
     }

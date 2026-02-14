@@ -25,6 +25,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPOutputStream;
 
@@ -55,7 +56,7 @@ public class InfluxDbV3Sender extends InfluxDbHttpSender {
                 host,
                 port,
                 database,
-                authToken != null ? authToken : "",
+                Objects.requireNonNullElse(authToken, ""),
                 timePrecision,
                 connectTimeout,
                 readTimeout,
@@ -66,7 +67,7 @@ public class InfluxDbV3Sender extends InfluxDbHttpSender {
         final var endpoint = new URL(protocol, host, port, "/api/v3/write_lp").toString();
         final var queryPrecision = String.format("precision=%s", TimeUtils.toTimePrecision(timePrecision));
         final var dbParameter = String.format("db=%s", URLEncoder.encode(database, StandardCharsets.UTF_8));
-        this.url = new URL(endpoint + "?" + queryPrecision + "&" + dbParameter);
+        this.url = new URL(String.format("%s?%s&%s", endpoint, queryPrecision, dbParameter));
     }
 
     @Override
@@ -85,15 +86,13 @@ public class InfluxDbV3Sender extends InfluxDbHttpSender {
             gzipOutputStream.flush();
             out.flush();
         }
+        // check for non 2xx response code
         final var responseCode = con.getResponseCode();
         if (responseCode / 100 != 2) {
-            throw new IOException("Server returned HTTP response code: " +
-                    responseCode +
-                    " for URL: " +
-                    url +
-                    " with content :'" +
-                    con.getResponseMessage() +
-                    "'");
+            throw new IOException(String.format("Server returned HTTP response code %d for URL '%s' with content: %s",
+                    responseCode,
+                    url,
+                    con.getResponseMessage()));
         }
         return responseCode;
     }

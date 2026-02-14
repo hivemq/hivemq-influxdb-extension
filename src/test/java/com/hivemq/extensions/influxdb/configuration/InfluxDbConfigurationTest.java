@@ -27,9 +27,6 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class InfluxDbConfigurationTest {
 
@@ -49,63 +46,120 @@ class InfluxDbConfigurationTest {
 
     @Test
     void validateConfiguration_ok() throws Exception {
-        Files.write(file, List.of("host:localhost", "port:3000"));
+        Files.write(file, List.of("host=localhost", "port=3000"));
         assertThat(influxDbConfiguration.readPropertiesFromFile()).isTrue();
         assertThat(influxDbConfiguration.validateConfiguration()).isTrue();
     }
 
     @Test
-    void validateConfiguration_wrong_port() throws Exception {
-        Files.write(file, List.of("host:localhost", "port:-3000"));
-        assertThat(influxDbConfiguration.readPropertiesFromFile()).isTrue();
-        assertThat(influxDbConfiguration.validateConfiguration()).isFalse();
-    }
-
-    @Test
     void validateConfiguration_host_missing() throws Exception {
-        Files.write(file, List.of("port:3000"));
+        Files.write(file, List.of("port=3000"));
         assertThat(influxDbConfiguration.readPropertiesFromFile()).isTrue();
         assertThat(influxDbConfiguration.validateConfiguration()).isFalse();
-    }
-
-    @Test
-    void validateConfiguration_port_missing() throws Exception {
-        Files.write(file, List.of("host:localhost"));
-        assertThat(influxDbConfiguration.readPropertiesFromFile()).isTrue();
-        assertThat(influxDbConfiguration.validateConfiguration()).isFalse();
-    }
-
-    @Test
-    void validateConfiguration_port_null() throws Exception {
-        Files.write(file, List.of("host:localhost", "port:"));
-        assertThat(influxDbConfiguration.readPropertiesFromFile()).isTrue();
-        assertThat(influxDbConfiguration.validateConfiguration()).isFalse();
-
-        assertThat(influxDbConfiguration.getProperty("port")).isNull();
+        assertThat(influxDbConfiguration.getProperty("host")).isNull();
     }
 
     @Test
     void validateConfiguration_host_null() throws Exception {
-        Files.write(file, List.of("host:", "port:3000"));
+        Files.write(file, List.of("host=", "port=3000"));
         assertThat(influxDbConfiguration.readPropertiesFromFile()).isTrue();
         assertThat(influxDbConfiguration.validateConfiguration()).isFalse();
-
         assertThat(influxDbConfiguration.getProperty("host")).isNull();
+    }
+
+    @Test
+    void validateConfiguration_host_default() throws Exception {
+        Files.write(file, List.of("host=<INFLUXDB IP>", "port=3000"));
+        assertThat(influxDbConfiguration.readPropertiesFromFile()).isTrue();
+        assertThat(influxDbConfiguration.validateConfiguration()).isFalse();
+        assertThat(influxDbConfiguration.getProperty("host")).isEqualTo("<INFLUXDB IP>");
+    }
+
+    @Test
+    void validateConfiguration_host_legacy_default() throws Exception {
+        Files.write(file, List.of("host=--INFLUX-DB-IP--", "port=3000"));
+        assertThat(influxDbConfiguration.readPropertiesFromFile()).isTrue();
+        assertThat(influxDbConfiguration.validateConfiguration()).isFalse();
+        assertThat(influxDbConfiguration.getProperty("host")).isEqualTo("--INFLUX-DB-IP--");
+    }
+
+    @Test
+    void validateConfiguration_port_missing() throws Exception {
+        Files.write(file, List.of("host=localhost"));
+        assertThat(influxDbConfiguration.readPropertiesFromFile()).isTrue();
+        assertThat(influxDbConfiguration.validateConfiguration()).isFalse();
+        assertThat(influxDbConfiguration.getProperty("port")).isNull();
+    }
+
+    @Test
+    void validateConfiguration_port_null() throws Exception {
+        Files.write(file, List.of("host=localhost", "port="));
+        assertThat(influxDbConfiguration.readPropertiesFromFile()).isTrue();
+        assertThat(influxDbConfiguration.validateConfiguration()).isFalse();
+        assertThat(influxDbConfiguration.getProperty("port")).isNull();
+    }
+
+    @Test
+    void validateConfiguration_port_invalid() throws Exception {
+        Files.write(file, List.of("host=localhost", "port=invalid"));
+        assertThat(influxDbConfiguration.readPropertiesFromFile()).isTrue();
+        assertThat(influxDbConfiguration.validateConfiguration()).isFalse();
+        assertThat(influxDbConfiguration.getProperty("port")).isEqualTo("invalid");
+    }
+
+    @Test
+    void validateConfiguration_port_negative() throws Exception {
+        Files.write(file, List.of("host=localhost", "port=-3000"));
+        assertThat(influxDbConfiguration.readPropertiesFromFile()).isTrue();
+        assertThat(influxDbConfiguration.validateConfiguration()).isFalse();
+        assertThat(influxDbConfiguration.getProperty("port")).isEqualTo("-3000");
+    }
+
+    @Test
+    void validateConfiguration_port_out_of_range() throws Exception {
+        Files.write(file, List.of("host=localhost", "port=65536"));
+        assertThat(influxDbConfiguration.readPropertiesFromFile()).isTrue();
+        assertThat(influxDbConfiguration.validateConfiguration()).isFalse();
+        assertThat(influxDbConfiguration.getProperty("port")).isEqualTo("65536");
+    }
+
+    @Test
+    void validateConfiguration_version_invalid() throws Exception {
+        Files.write(file, List.of("host=localhost", "port=3000", "version=invalid"));
+        assertThat(influxDbConfiguration.readPropertiesFromFile()).isTrue();
+        assertThat(influxDbConfiguration.validateConfiguration()).isFalse();
+        assertThat(influxDbConfiguration.getProperty("version")).isEqualTo("invalid");
+    }
+
+    @Test
+    void validateConfiguration_version_negative() throws Exception {
+        Files.write(file, List.of("host=localhost", "port=3000", "version=-1"));
+        assertThat(influxDbConfiguration.readPropertiesFromFile()).isTrue();
+        assertThat(influxDbConfiguration.validateConfiguration()).isFalse();
+        assertThat(influxDbConfiguration.getProperty("version")).isEqualTo("-1");
+    }
+
+    @Test
+    void validateConfiguration_version_out_of_range() throws Exception {
+        Files.write(file, List.of("host=localhost", "port=3000", "version=4"));
+        assertThat(influxDbConfiguration.readPropertiesFromFile()).isTrue();
+        assertThat(influxDbConfiguration.validateConfiguration()).isFalse();
+        assertThat(influxDbConfiguration.getProperty("version")).isEqualTo("4");
     }
 
     @Test
     void all_properties_empty() throws Exception {
         Files.write(file,
-                List.of("mode:",
-                        "host:",
-                        "port:",
-                        "tags:",
-                        "prefix:",
-                        "protocol:",
-                        "database:",
-                        "connectTimeout:",
-                        "reportingInterval:",
-                        "auth:"));
+                List.of("mode=",
+                        "host=",
+                        "port=",
+                        "tags=",
+                        "prefix=",
+                        "protocol=",
+                        "database=",
+                        "connectTimeout=",
+                        "reportingInterval=",
+                        "auth="));
         assertThat(influxDbConfiguration.readPropertiesFromFile()).isTrue();
         assertThat(influxDbConfiguration.validateConfiguration()).isFalse();
 
@@ -117,8 +171,8 @@ class InfluxDbConfigurationTest {
         assertThat(influxDbConfiguration.getConnectTimeout()).isEqualTo(5000);
         assertThat(influxDbConfiguration.getReportingInterval()).isEqualTo(1);
         assertThat(influxDbConfiguration.getAuth()).isNull();
-        assertThat(influxDbConfiguration.getHost()).isNull();
-        assertThat(influxDbConfiguration.getPort()).isNull();
+        assertThat(influxDbConfiguration.getHost()).isEmpty();
+        assertThat(influxDbConfiguration.getPort()).isZero();
     }
 
     @Test
@@ -135,23 +189,23 @@ class InfluxDbConfigurationTest {
         assertThat(influxDbConfiguration.getConnectTimeout()).isEqualTo(5000);
         assertThat(influxDbConfiguration.getReportingInterval()).isEqualTo(1);
         assertThat(influxDbConfiguration.getAuth()).isNull();
-        assertThat(influxDbConfiguration.getHost()).isNull();
-        assertThat(influxDbConfiguration.getPort()).isNull();
+        assertThat(influxDbConfiguration.getHost()).isEmpty();
+        assertThat(influxDbConfiguration.getPort()).isZero();
     }
 
     @Test
     void all_properties_have_correct_values() throws Exception {
         Files.write(file,
-                List.of("mode:tcp",
-                        "host:hivemq.monitoring.com",
-                        "port:3000",
-                        "tags:host=hivemq1;version=3.4.1",
-                        "prefix:node1",
-                        "protocol:tcp",
-                        "database:test-hivemq",
-                        "connectTimeout:10000",
-                        "reportingInterval:5",
-                        "auth:username:password"));
+                List.of("mode=tcp",
+                        "host=hivemq.monitoring.com",
+                        "port=3000",
+                        "tags=host=hivemq1;version=3.4.1",
+                        "prefix=node1",
+                        "protocol=tcp",
+                        "database=test-hivemq",
+                        "connectTimeout=10000",
+                        "reportingInterval=5",
+                        "auth=username:password"));
         assertThat(influxDbConfiguration.readPropertiesFromFile()).isTrue();
         assertThat(influxDbConfiguration.validateConfiguration()).isTrue();
 
@@ -169,7 +223,7 @@ class InfluxDbConfigurationTest {
 
     @Test
     void tags_invalid_configured() throws Exception {
-        Files.write(file, List.of("tags:host=hivemq1;version=;use=monitoring"));
+        Files.write(file, List.of("tags=host=hivemq1;version=;use=monitoring"));
         assertThat(influxDbConfiguration.readPropertiesFromFile()).isTrue();
         assertThat(influxDbConfiguration.validateConfiguration()).isFalse();
 
@@ -178,7 +232,7 @@ class InfluxDbConfigurationTest {
 
     @Test
     void tags_has_only_semicolons() throws Exception {
-        Files.write(file, List.of("tags:;;;;;;"));
+        Files.write(file, List.of("tags=;;;;;;"));
         assertThat(influxDbConfiguration.readPropertiesFromFile()).isTrue();
         assertThat(influxDbConfiguration.validateConfiguration()).isFalse();
 
@@ -187,7 +241,7 @@ class InfluxDbConfigurationTest {
 
     @Test
     void tags_has_only_a_key() throws Exception {
-        Files.write(file, List.of("tags:okay"));
+        Files.write(file, List.of("tags=okay"));
         assertThat(influxDbConfiguration.readPropertiesFromFile()).isTrue();
         assertThat(influxDbConfiguration.validateConfiguration()).isFalse();
 
@@ -196,20 +250,20 @@ class InfluxDbConfigurationTest {
 
     @Test
     void tags_has_correct_tag_but_missing_semicolon() throws Exception {
-        Files.write(file, List.of("tags:key=value"));
-        assertTrue(influxDbConfiguration.readPropertiesFromFile());
-        assertFalse(influxDbConfiguration.validateConfiguration());
+        Files.write(file, List.of("tags=key=value"));
+        assertThat(influxDbConfiguration.readPropertiesFromFile()).isTrue();
+        assertThat(influxDbConfiguration.validateConfiguration()).isFalse();
 
-        final Map<String, String> tags = influxDbConfiguration.getTags();
-        assertEquals(1, tags.size());
+        final var tags = influxDbConfiguration.getTags();
+        assertThat(tags).containsExactlyEntriesOf(Map.of("key", "value"));
     }
 
     @Test
     void properties_that_are_numbers_have_invalid_string() throws Exception {
-        Files.write(file, List.of("host:test", "port:800000", "reportingInterval:0", "connectTimeout:-1"));
-        assertTrue(influxDbConfiguration.readPropertiesFromFile());
+        Files.write(file, List.of("host=test", "port=800000", "reportingInterval=0", "connectTimeout=-1"));
+        assertThat(influxDbConfiguration.readPropertiesFromFile()).isTrue();
         // false because port is out of range
-        assertFalse(influxDbConfiguration.validateConfiguration());
+        assertThat(influxDbConfiguration.validateConfiguration()).isFalse();
 
         // default values because values in file are no valid (zero or negative number)
         assertThat(influxDbConfiguration.getConnectTimeout()).isEqualTo(5000);
@@ -217,86 +271,113 @@ class InfluxDbConfigurationTest {
     }
 
     @Test
-    void validateConfiguration_cloud_token_missing() throws Exception {
-        Files.write(file, List.of("mode:cloud", "host:localhost", "bucket:mybucket"));
-        assertTrue(influxDbConfiguration.readPropertiesFromFile());
-        assertFalse(influxDbConfiguration.validateConfiguration());
+    void validateConfiguration_cloud() throws Exception {
+        Files.write(file,
+                List.of("mode=cloud",
+                        "host=localhost",
+                        "port=3000",
+                        "auth=my-token",
+                        "bucket=my-bucket",
+                        "organization=hivemq"));
+        assertThat(influxDbConfiguration.readPropertiesFromFile()).isTrue();
+        assertThat(influxDbConfiguration.validateConfiguration()).isTrue();
+        assertThat(influxDbConfiguration.getMode()).isEqualTo("cloud");
+        assertThat(influxDbConfiguration.getAuth()).isEqualTo("my-token");
+        assertThat(influxDbConfiguration.getBucket()).isEqualTo("my-bucket");
+        assertThat(influxDbConfiguration.getOrganization()).isEqualTo("hivemq");
+    }
+
+    @Test
+    void validateConfiguration_cloud_auth_missing() throws Exception {
+        Files.write(file,
+                List.of("mode=cloud", "host=localhost", "port=3000", "bucket=my-bucket", "organization=hivemq"));
+        assertThat(influxDbConfiguration.readPropertiesFromFile()).isTrue();
+        assertThat(influxDbConfiguration.validateConfiguration()).isFalse();
+        assertThat(influxDbConfiguration.getMode()).isEqualTo("cloud");
+        assertThat(influxDbConfiguration.getBucket()).isEqualTo("my-bucket");
+        assertThat(influxDbConfiguration.getOrganization()).isEqualTo("hivemq");
     }
 
     @Test
     void validateConfiguration_cloud_bucket_missing() throws Exception {
-        Files.write(file, List.of("mode:cloud", "host:localhost", "token:mytoken"));
-        assertTrue(influxDbConfiguration.readPropertiesFromFile());
-        assertFalse(influxDbConfiguration.validateConfiguration());
+        Files.write(file, List.of("mode=cloud", "host=localhost", "port=3000", "auth=my-token", "organization=hivemq"));
+        assertThat(influxDbConfiguration.readPropertiesFromFile()).isTrue();
+        assertThat(influxDbConfiguration.validateConfiguration()).isFalse();
+        assertThat(influxDbConfiguration.getMode()).isEqualTo("cloud");
+        assertThat(influxDbConfiguration.getAuth()).isEqualTo("my-token");
+        assertThat(influxDbConfiguration.getOrganization()).isEqualTo("hivemq");
     }
 
     @Test
-    void validateConfiguration_cloud_ok() throws Exception {
-        Files.write(file, List.of("mode:cloud", "host:localhost", "token:mytoken", "bucket:mybucket"));
-        assertTrue(influxDbConfiguration.readPropertiesFromFile());
-        assertFalse(influxDbConfiguration.validateConfiguration());
+    void validateConfiguration_cloud_organization_missing() throws Exception {
+        Files.write(file, List.of("mode=cloud", "host=localhost", "port=3000", "auth=my-token", "bucket=my-bucket"));
+        assertThat(influxDbConfiguration.readPropertiesFromFile()).isTrue();
+        assertThat(influxDbConfiguration.validateConfiguration()).isFalse();
+        assertThat(influxDbConfiguration.getMode()).isEqualTo("cloud");
+        assertThat(influxDbConfiguration.getAuth()).isEqualTo("my-token");
+        assertThat(influxDbConfiguration.getBucket()).isEqualTo("my-bucket");
     }
 
     @Test
     void getVersion_not_set() throws Exception {
-        Files.write(file, List.of("host:localhost", "port:8086"));
+        Files.write(file, List.of("host=localhost", "port=8086"));
         assertThat(influxDbConfiguration.readPropertiesFromFile()).isTrue();
-        assertThat(influxDbConfiguration.getVersion()).isNull();
+        assertThat(influxDbConfiguration.getVersion()).isOne();
     }
 
     @Test
     void getVersion_empty() throws Exception {
-        Files.write(file, List.of("host:localhost", "port:8086", "version:"));
+        Files.write(file, List.of("host=localhost", "port=8086", "version="));
         assertThat(influxDbConfiguration.readPropertiesFromFile()).isTrue();
-        assertThat(influxDbConfiguration.getVersion()).isNull();
+        assertThat(influxDbConfiguration.getVersion()).isOne();
     }
 
     @Test
     void getVersion_v1() throws Exception {
-        Files.write(file, List.of("host:localhost", "port:8086", "version:1"));
+        Files.write(file, List.of("host=localhost", "port=8086", "version=1"));
         assertThat(influxDbConfiguration.readPropertiesFromFile()).isTrue();
-        assertThat(influxDbConfiguration.getVersion()).isEqualTo(1);
+        assertThat(influxDbConfiguration.getVersion()).isOne();
     }
 
     @Test
     void getVersion_v2() throws Exception {
-        Files.write(file, List.of("host:localhost", "port:8086", "version:2"));
+        Files.write(file, List.of("host=localhost", "port=8086", "version=2"));
         assertThat(influxDbConfiguration.readPropertiesFromFile()).isTrue();
         assertThat(influxDbConfiguration.getVersion()).isEqualTo(2);
     }
 
     @Test
     void getVersion_v3() throws Exception {
-        Files.write(file, List.of("host:localhost", "port:8086", "version:3"));
+        Files.write(file, List.of("host=localhost", "port=8086", "version=3"));
         assertThat(influxDbConfiguration.readPropertiesFromFile()).isTrue();
         assertThat(influxDbConfiguration.getVersion()).isEqualTo(3);
     }
 
     @Test
-    void getVersion_unsupported_version() throws Exception {
-        Files.write(file, List.of("host:localhost", "port:8086", "version:4"));
-        assertThat(influxDbConfiguration.readPropertiesFromFile()).isTrue();
-        assertThat(influxDbConfiguration.getVersion()).isNull();
-    }
-
-    @Test
     void getVersion_zero() throws Exception {
-        Files.write(file, List.of("host:localhost", "port:8086", "version:0"));
+        Files.write(file, List.of("host=localhost", "port=8086", "version=0"));
         assertThat(influxDbConfiguration.readPropertiesFromFile()).isTrue();
-        assertThat(influxDbConfiguration.getVersion()).isNull();
+        assertThat(influxDbConfiguration.getVersion()).isOne();
     }
 
     @Test
     void getVersion_not_a_number() throws Exception {
-        Files.write(file, List.of("host:localhost", "port:8086", "version:abc"));
+        Files.write(file, List.of("host=localhost", "port=8086", "version=abc"));
         assertThat(influxDbConfiguration.readPropertiesFromFile()).isTrue();
-        assertThat(influxDbConfiguration.getVersion()).isNull();
+        assertThat(influxDbConfiguration.getVersion()).isOne();
     }
 
     @Test
     void getVersion_negative() throws Exception {
-        Files.write(file, List.of("host:localhost", "port:8086", "version:-1"));
+        Files.write(file, List.of("host=localhost", "port=8086", "version=-1"));
         assertThat(influxDbConfiguration.readPropertiesFromFile()).isTrue();
-        assertThat(influxDbConfiguration.getVersion()).isNull();
+        assertThat(influxDbConfiguration.getVersion()).isOne();
+    }
+
+    @Test
+    void getVersion_auto_detect_v2_from_cloud_mode() throws Exception {
+        Files.write(file, List.of("host=localhost", "port=8086", "mode=cloud"));
+        assertThat(influxDbConfiguration.readPropertiesFromFile()).isTrue();
+        assertThat(influxDbConfiguration.getVersion()).isEqualTo(2);
     }
 }
