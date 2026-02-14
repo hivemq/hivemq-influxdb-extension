@@ -236,4 +236,67 @@ class InfluxDbConfigurationTest {
         assertTrue(influxDbConfiguration.readPropertiesFromFile());
         assertFalse(influxDbConfiguration.validateConfiguration());
     }
+
+    @Test
+    void getVersion_not_set() throws Exception {
+        Files.write(file, List.of("host:localhost", "port:8086"));
+        assertThat(influxDbConfiguration.readPropertiesFromFile()).isTrue();
+        assertThat(influxDbConfiguration.getVersion()).isNull();
+    }
+
+    @Test
+    void getVersion_empty() throws Exception {
+        Files.write(file, List.of("host:localhost", "port:8086", "version:"));
+        assertThat(influxDbConfiguration.readPropertiesFromFile()).isTrue();
+        assertThat(influxDbConfiguration.getVersion()).isNull();
+    }
+
+    @Test
+    void getVersion_v1() throws Exception {
+        Files.write(file, List.of("host:localhost", "port:8086", "version:1"));
+        assertThat(influxDbConfiguration.readPropertiesFromFile()).isTrue();
+        assertThat(influxDbConfiguration.getVersion()).isEqualTo(1);
+    }
+
+    @Test
+    void getVersion_v2() throws Exception {
+        Files.write(file, List.of("host:localhost", "port:8086", "version:2"));
+        assertThat(influxDbConfiguration.readPropertiesFromFile()).isTrue();
+        assertThat(influxDbConfiguration.getVersion()).isEqualTo(2);
+    }
+
+    @Test
+    void getVersion_v3() throws Exception {
+        Files.write(file, List.of("host:localhost", "port:8086", "version:3"));
+        assertThat(influxDbConfiguration.readPropertiesFromFile()).isTrue();
+        assertThat(influxDbConfiguration.getVersion()).isEqualTo(3);
+    }
+
+    @Test
+    void getVersion_unsupported_version() throws Exception {
+        Files.write(file, List.of("host:localhost", "port:8086", "version:4"));
+        assertThat(influxDbConfiguration.readPropertiesFromFile()).isTrue();
+        assertThat(influxDbConfiguration.getVersion()).isNull();
+    }
+
+    @Test
+    void getVersion_zero() throws Exception {
+        Files.write(file, List.of("host:localhost", "port:8086", "version:0"));
+        assertThat(influxDbConfiguration.readPropertiesFromFile()).isTrue();
+        assertThat(influxDbConfiguration.getVersion()).isNull();
+    }
+
+    @Test
+    void getVersion_not_a_number() throws Exception {
+        Files.write(file, List.of("host:localhost", "port:8086", "version:abc"));
+        assertThat(influxDbConfiguration.readPropertiesFromFile()).isTrue();
+        assertThat(influxDbConfiguration.getVersion()).isNull();
+    }
+
+    @Test
+    void getVersion_negative() throws Exception {
+        Files.write(file, List.of("host:localhost", "port:8086", "version:-1"));
+        assertThat(influxDbConfiguration.readPropertiesFromFile()).isTrue();
+        assertThat(influxDbConfiguration.getVersion()).isNull();
+    }
 }
