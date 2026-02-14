@@ -59,6 +59,9 @@ public class InfluxDbConfiguration extends PropertiesReader {
     private static final @NotNull String BUCKET = "bucket";
     private static final @NotNull String ORGANIZATION = "organization";
 
+    // InfluxDB version
+    private static final @NotNull String VERSION = "version";
+
 
     public InfluxDbConfiguration(final @NotNull File configFile) {
         super(configFile);
@@ -186,6 +189,38 @@ public class InfluxDbConfiguration extends PropertiesReader {
 
     public @Nullable String getOrganization() {
         return getProperty(ORGANIZATION);
+    }
+
+    /**
+     * Check if the version property was explicitly set in the configuration (even if invalid).
+     *
+     * @return {@code true} if the version property has a value, {@code false} if absent or empty.
+     */
+    public boolean isVersionConfigured() {
+        return getProperty(VERSION) != null;
+    }
+
+    /**
+     * Get the configured InfluxDB version.
+     *
+     * @return the configured version (1, 2, or 3), or {@code null} if not specified or invalid.
+     */
+    public @Nullable Integer getVersion() {
+        final var value = getProperty(VERSION);
+        if (value == null) {
+            return null;
+        }
+        try {
+            final int version = Integer.parseInt(value);
+            if (version < 1 || version > 3) {
+                LOG.error("Unsupported InfluxDB version: {}. Supported versions: 1, 2, 3", version);
+                return null;
+            }
+            return version;
+        } catch (final NumberFormatException e) {
+            LOG.error("Value for '{}' is not a number: {}", VERSION, value);
+            return null;
+        }
     }
 
     /**
