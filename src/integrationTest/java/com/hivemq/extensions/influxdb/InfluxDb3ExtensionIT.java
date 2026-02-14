@@ -85,18 +85,19 @@ class InfluxDb3ExtensionIT {
         mqttClient.publishWith().topic("my/topic3").send();
         mqttClient.disconnect();
 
-        await().until(() -> getMetricMax("com.hivemq.messages.incoming.publish.count") == 3);
-        await().until(() -> getMetricMax("com.hivemq.messages.incoming.connect.count") == 1);
+        final var host = influxDB.getHost();
+        final var port = influxDB.getMappedPort(INFLUXDB_PORT);
+        await().until(() -> getMetricMax(host, port, "com.hivemq.messages.incoming.publish.count") == 3);
+        await().until(() -> getMetricMax(host, port, "com.hivemq.messages.incoming.connect.count") == 1);
     }
 
-    private long getMetricMax(final @NotNull String metric) {
+    private static long getMetricMax(final @NotNull String host, final int port, final @NotNull String metric) {
         try {
             final var sql = "SELECT max(\"count\") AS max_val FROM \"%s\"".formatted(metric);
-            final var uri =
-                    URI.create("http://%s:%d/api/v3/query_sql?db=%s&format=csv&q=%s".formatted(influxDB.getHost(),
-                            influxDB.getMappedPort(INFLUXDB_PORT),
-                            URLEncoder.encode(INFLUXDB_DATABASE, StandardCharsets.UTF_8),
-                            URLEncoder.encode(sql, StandardCharsets.UTF_8)));
+            final var uri = URI.create("http://%s:%d/api/v3/query_sql?db=%s&format=csv&q=%s".formatted(host,
+                    port,
+                    URLEncoder.encode(INFLUXDB_DATABASE, StandardCharsets.UTF_8),
+                    URLEncoder.encode(sql, StandardCharsets.UTF_8)));
             final var request = HttpRequest.newBuilder().uri(uri).GET().build();
             final var response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() != 200) {

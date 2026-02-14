@@ -31,9 +31,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 
-/**
- * @author Christoph Schäbel
- */
 @WireMockTest
 class InfluxDbCloudSenderTest {
 

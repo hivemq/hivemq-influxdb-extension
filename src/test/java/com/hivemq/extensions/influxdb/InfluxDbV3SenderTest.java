@@ -53,9 +53,8 @@ class InfluxDbV3SenderTest {
 
         sender.writeData("measurement,tag=value field=1".getBytes());
 
-        verify(postRequestedFor(urlEqualTo("/api/v3/write_lp?precision=s&db=testdb"))
-                .withHeader("Authorization", equalTo("Bearer mytoken"))
-                .withRequestBody(equalTo("measurement,tag=value field=1")));
+        verify(postRequestedFor(urlEqualTo("/api/v3/write_lp?precision=s&db=testdb")).withHeader("Authorization",
+                equalTo("Bearer mytoken")).withRequestBody(equalTo("measurement,tag=value field=1")));
     }
 
     @Test
@@ -94,8 +93,8 @@ class InfluxDbV3SenderTest {
 
         sender.writeData("line=line".getBytes());
 
-        verify(postRequestedFor(urlEqualTo("/api/v3/write_lp?precision=s&db=testdb"))
-                .withHeader("Authorization", absent()));
+        verify(postRequestedFor(urlEqualTo("/api/v3/write_lp?precision=s&db=testdb")).withHeader("Authorization",
+                absent()));
     }
 
     @Test
@@ -115,8 +114,8 @@ class InfluxDbV3SenderTest {
 
         sender.writeData("line=line".getBytes());
 
-        verify(postRequestedFor(urlEqualTo("/api/v3/write_lp?precision=s&db=testdb"))
-                .withHeader("Authorization", absent()));
+        verify(postRequestedFor(urlEqualTo("/api/v3/write_lp?precision=s&db=testdb")).withHeader("Authorization",
+                absent()));
     }
 
     @Test
@@ -135,13 +134,11 @@ class InfluxDbV3SenderTest {
 
         sender.writeData("line=line".getBytes());
 
-        verify(postRequestedFor(urlPathEqualTo("/api/v3/write_lp"))
-                .withHeader("Content-Encoding", equalTo("gzip")));
+        verify(postRequestedFor(urlPathEqualTo("/api/v3/write_lp")).withHeader("Content-Encoding", equalTo("gzip")));
     }
 
     @Test
-    void test_write_data_database_url_encoded(final @NotNull WireMockRuntimeInfo wireMockRuntimeInfo)
-            throws Exception {
+    void test_write_data_database_url_encoded(final @NotNull WireMockRuntimeInfo wireMockRuntimeInfo) throws Exception {
         final var sender = new InfluxDbV3Sender("http",
                 "localhost",
                 wireMockRuntimeInfo.getHttpPort(),

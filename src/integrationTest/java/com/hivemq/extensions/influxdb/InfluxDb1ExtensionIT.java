@@ -50,7 +50,7 @@ class InfluxDb1ExtensionIT {
             new HiveMQContainer(OciImages.getImageName("hivemq/extensions/hivemq-influxdb-extension")
                     .asCompatibleSubstituteFor("hivemq/hivemq-ce")) //
                     .withNetwork(network)
-                    .withCopyToContainer(MountableFile.forClasspathResource("config.properties"),
+                    .withCopyToContainer(MountableFile.forClasspathResource("config-v1.properties"),
                             "/opt/hivemq/extensions/hivemq-influxdb-extension/conf/config.properties")
                     .withLogConsumer(outputFrame -> LOG.info("HIVEMQ: {}", outputFrame.getUtf8String()))
                     .withEnv("HIVEMQ_DISABLE_STATISTICS", "true");
@@ -92,7 +92,7 @@ class InfluxDb1ExtensionIT {
                 new HiveMQContainer(OciImages.getImageName("hivemq/extensions/hivemq-influxdb-extension")
                         .asCompatibleSubstituteFor("hivemq/hivemq-ce")) //
                         .withNetwork(network)
-                        .withCopyToContainer(MountableFile.forClasspathResource("config.properties"),
+                        .withCopyToContainer(MountableFile.forClasspathResource("config-v1.properties"),
                                 "/opt/hivemq/extensions/hivemq-influxdb-extension/influxdb.properties")
                         .withLogConsumer(outputFrame -> LOG.info("HIVEMQ: {}", outputFrame.getUtf8String()))
                         .withEnv("HIVEMQ_DISABLE_STATISTICS", "true");
@@ -116,7 +116,7 @@ class InfluxDb1ExtensionIT {
         }
     }
 
-    private long getMetricMax(final @NotNull InfluxDBClient client, final @NotNull String metric) {
+    private static long getMetricMax(final @NotNull InfluxDBClient client, final @NotNull String metric) {
         final var influxQL = String.format("SELECT MAX(count) FROM \"%s\"", metric);
         final var query = new InfluxQLQuery(influxQL, INFLUXDB_DATABASE);
         final var result = client.getInfluxQLQueryApi().query(query);
