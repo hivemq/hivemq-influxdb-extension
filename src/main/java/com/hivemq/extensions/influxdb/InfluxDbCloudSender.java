@@ -62,25 +62,30 @@ public class InfluxDbCloudSender extends InfluxDbHttpSender {
     @Override
     protected int writeData(final byte @NotNull [] line) throws Exception {
         final var con = (HttpURLConnection) url.openConnection();
-        con.setRequestMethod("POST");
-        con.setRequestProperty("Authorization", "Token " + authToken);
-        con.setDoOutput(true);
-        con.setConnectTimeout(connectTimeout);
-        con.setReadTimeout(readTimeout);
-        con.setRequestProperty("Content-Encoding", "gzip");
-        try (final var out = con.getOutputStream(); final var gzipOutputStream = new GZIPOutputStream(out)) {
-            gzipOutputStream.write(line);
-            gzipOutputStream.flush();
-            out.flush();
+        try {
+            con.setRequestMethod("POST");
+            con.setRequestProperty("Authorization", "Token " + authToken);
+            con.setDoOutput(true);
+            con.setConnectTimeout(connectTimeout);
+            con.setReadTimeout(readTimeout);
+            con.setRequestProperty("Content-Encoding", "gzip");
+            try (final var out = con.getOutputStream(); final var gzipOutputStream = new GZIPOutputStream(out)) {
+                gzipOutputStream.write(line);
+                gzipOutputStream.flush();
+                out.flush();
+            }
+            // check for non 2xx response code
+            final var responseCode = con.getResponseCode();
+            if (responseCode / 100 != 2) {
+                throw new IOException(String.format(
+                        "Server returned HTTP response code %d for URL '%s' with content: %s",
+                        responseCode,
+                        url,
+                        con.getResponseMessage()));
+            }
+            return responseCode;
+        } finally {
+            con.disconnect();
         }
-        // check for non 2xx response code
-        final var responseCode = con.getResponseCode();
-        if (responseCode / 100 != 2) {
-            throw new IOException(String.format("Server returned HTTP response code %d for URL '%s' with content: %s",
-                    responseCode,
-                    url,
-                    con.getResponseMessage()));
-        }
-        return responseCode;
     }
 }
