@@ -4,6 +4,7 @@
 :docker: https://www.docker.com/
 :influxdb-docker: https://hub.docker.com/_/influxdb/
 :download-influxdb-extension: https://www.hivemq.com/products/extensions/influxdb-extension/
+:influxdata-docs: https://docs.influxdata.com/
 
 = HiveMQ InfluxDB Monitoring Extension
 
@@ -21,7 +22,7 @@ This database can be used as the data source for a monitoring dashboard (like Gr
 
 Installing the extension for HiveMQ is very easy:
 
-. Download the extension from the {download-influxdb-extension}[HiveMQ website] and unzip the downloaded zip file.
+. Download the extension from the {download-influxdb-extension}[HiveMQ website] and unzip the downloaded zip file.
 . In the folder `hivemq-influxdb-extension`, modify the `conf/config.properties` file to fit your needs.
 Check that the mandatory properties (host, port) are set
 . Copy the folder `hivemq-influxdb-extension` to your `<HIVEMQ_HOME>/extensions` folder
@@ -37,48 +38,95 @@ The extension won't start if this file is missing or the required properties are
 |===
 | Config name | Required | Description | Default
 
-| mode | no | The mode configured for the InfluxDB sender.
-Possibilities are: http, tcp, udp, cloud | http
+| version | no | The InfluxDB API version to use.
+Valid values: `1`, `2`, `3`.
+If omitted, the version is auto-detected from `mode` for backward compatibility (`cloud` maps to v2, all others map to v1). | auto-detected from `mode`
+| mode | no | Controls the transport for InfluxDB v1: `http`, `tcp`, or `udp`.
+The value `cloud` is a backward-compatible alias that selects InfluxDB v2.
+Ignored when `version=2` or `version=3` (the sender is selected by `version`). | http
 | host | yes | The host name of the InfluxDB instance. | -
-| port | yes | The port number the InfluxDB instance is listening. | 8086
+| port | yes | The port number the InfluxDB instance is listening on.
+Typical values: `8086` for v1 and v2, `8181` for v3. | 8086
 | protocol | no | The protocol the InfluxDB sender uses in http mode. | http (or https for cloud mode)
-| auth | no | The authorization string to be used to connect to InfluxDB, of format username:password.
-If mode "cloud" is used, the token must be passed here| -
+| auth | no | The authorization string to connect to InfluxDB.
+For v1 (http mode): optional `username:password` for basic authentication.
+For v2: required; provide the InfluxDB token value (the extension prepends `Token ` automatically).
+For v3: optional; provide a Bearer token value (the extension prepends `Bearer ` automatically). | -
 | prefix | no | The measurement prefix. | -
-| database | no | The database name. | hivemq
+| database | no | The database name.
+Used for v1 and v3.
+Not used for v2 (use `bucket` instead). | hivemq
 | reportingInterval | no | The reporting interval in seconds. | 1
-| connectTimeout | no | The connect and read timeout in seconds. | 5000
+| connectTimeout | no | The connect and read timeout in milliseconds. | 5000
 | tags | no | The tags for each metric.
 Listed as a semicolon ( `;` ) separated list. | -
-| organization | only for mode: "cloud" | The organization to push data to | -
-| bucket | only for mode: "cloud" | The bucket to push data to | -
+| organization | only for v2 | The organization to push data to.
+Required when `version=2` (or `mode=cloud`).
+Not used for v1 or v3. | -
+| bucket | only for v2 | The bucket to push data to.
+Required when `version=2` (or `mode=cloud`).
+Not used for v1 or v3. | -
 |===
 
-NOTE: When using InfluxDB 2 the *_Cloud_* mode should be configured.
+NOTE: Set `version=2` for InfluxDB 2 (Cloud).
+Set `version=3` for InfluxDB 3.
+If you omit `version`, the extension infers the version from `mode` and logs a deprecation warning.
 
-.Example Configuration
-[source]
+=== Example Configurations
+
+.InfluxDB v1 Example Configuration
+[source,properties]
 ----
-mode:http
-host:localhost
-port:8086
-protocol:http
-auth:
+version=1
+mode=http
+host=<INFLUXDB IP>
+port=8086
+protocol=http
+auth=
+prefix=
+database=hivemq
+reportingInterval=1
+connectTimeout=5000
+tags=host=<NODE NAME>
+----
 
-prefix:
-database:hivemq
+.InfluxDB v2 Example Configuration
+[source,properties]
+----
+version=2
+mode=cloud
+host=<INFLUXDB IP>
+port=8086
+auth=<token>
+prefix=
+bucket=<bucket>
+organization=<org>
+reportingInterval=1
+connectTimeout=5000
+tags=host=<NODE NAME>
+----
 
-reportingInterval:1
-connectTimeout:5000
-
-tags:host=hivemq1
+.InfluxDB v3 Example Configuration
+[source,properties]
+----
+version=3
+host=<INFLUXDB IP>
+port=8181
+protocol=http
+auth=
+prefix=
+database=hivemq
+reportingInterval=1
+connectTimeout=5000
+tags=host=<NODE NAME>
 ----
 
 == First Steps
 
-=== Quick Start InfluxDB
+=== Quick Start InfluxDB v1
 
-If you don't already have an InfluxDB instance set up, here is an instruction how to start a not configured InfluxDB instance with Docker.
+The following instructions describe how to start an InfluxDB v1 instance with Docker.
+For InfluxDB v2 or v3 setup, refer to the {influxdata-docs}[InfluxData documentation^].
 
 . Download and install {docker}[Docker^] for your platform
 . Start an InfluxDB docker container with the command `docker run -p 8086:8086 -v $PWD:/var/lib/influxdb influxdb`.
