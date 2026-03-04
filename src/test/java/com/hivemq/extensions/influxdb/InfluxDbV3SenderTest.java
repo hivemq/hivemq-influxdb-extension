@@ -54,8 +54,9 @@ class InfluxDbV3SenderTest {
 
         sender.writeData("measurement,tag=value field=1".getBytes());
 
-        verify(postRequestedFor(urlEqualTo("/api/v3/write_lp?precision=s&db=testdb")).withHeader("Authorization",
-                equalTo("Bearer mytoken")).withRequestBody(equalTo("measurement,tag=value field=1")));
+        verify(postRequestedFor(urlEqualTo("/api/v3/write_lp?precision=s&db=testdb"))
+                .withHeader("Authorization", equalTo("Bearer mytoken"))
+                .withRequestBody(equalTo("measurement,tag=value field=1")));
     }
 
     @Test
@@ -169,8 +170,8 @@ class InfluxDbV3SenderTest {
                 "",
                 "testdb");
 
-        stubFor(post(urlPathEqualTo("/api/v3/write_lp")).willReturn(aResponse().withStatus(500)
-                .withBody("Internal Server Error")));
+        stubFor(post(urlPathEqualTo("/api/v3/write_lp"))
+                .willReturn(aResponse().withStatus(500).withBody("Internal Server Error")));
 
         assertThrows(IOException.class, () -> sender.writeData("line=line".getBytes()));
     }
@@ -187,8 +188,8 @@ class InfluxDbV3SenderTest {
                 "",
                 "testdb");
 
-        stubFor(post(urlPathEqualTo("/api/v3/write_lp")).willReturn(aResponse().withStatus(401)
-                .withBody("Unauthorized")));
+        stubFor(post(urlPathEqualTo("/api/v3/write_lp"))
+                .willReturn(aResponse().withStatus(401).withBody("Unauthorized")));
 
         assertThrows(IOException.class, () -> sender.writeData("line=line".getBytes()));
     }

@@ -54,7 +54,7 @@ class InfluxDb3ExtensionIT {
     @Container
     private final @NotNull HiveMQContainer hivemq =
             new HiveMQContainer(OciImages.getImageName("hivemq/extensions/hivemq-influxdb-extension")
-                    .asCompatibleSubstituteFor("hivemq/hivemq-ce")) //
+                    .asCompatibleSubstituteFor("hivemq/hivemq-ce"))
                     .withNetwork(network)
                     .withCopyToContainer(MountableFile.forClasspathResource("config-v3.properties"),
                             "/opt/hivemq/extensions/hivemq-influxdb-extension/conf/config.properties")
@@ -62,14 +62,13 @@ class InfluxDb3ExtensionIT {
                     .withEnv("HIVEMQ_DISABLE_STATISTICS", "true");
 
     @Container
-    private final @NotNull GenericContainer<?> influxDB =
-            new GenericContainer<>(OciImages.getImageName("influxdb:v3")) //
-                    .withCommand("serve", "--node-id", "test", "--object-store", "memory", "--without-auth")
-                    .withExposedPorts(INFLUXDB_PORT)
-                    .waitingFor(Wait.forHttp("/health").forPort(INFLUXDB_PORT))
-                    .withNetwork(network)
-                    .withNetworkAliases("influxdb")
-                    .withLogConsumer(outputFrame -> LOG.info("INFLUXDB: {}", outputFrame.getUtf8String()));
+    private final @NotNull GenericContainer<?> influxDB = new GenericContainer<>(OciImages.getImageName("influxdb:v3"))
+            .withCommand("serve", "--node-id", "test", "--object-store", "memory", "--without-auth")
+            .withExposedPorts(INFLUXDB_PORT)
+            .waitingFor(Wait.forHttp("/health").forPort(INFLUXDB_PORT))
+            .withNetwork(network)
+            .withNetworkAliases("influxdb")
+            .withLogConsumer(outputFrame -> LOG.info("INFLUXDB: {}", outputFrame.getUtf8String()));
 
     @AfterEach
     void tearDown() {

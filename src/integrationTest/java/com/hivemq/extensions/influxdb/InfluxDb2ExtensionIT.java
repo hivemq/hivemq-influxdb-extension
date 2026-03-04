@@ -51,7 +51,7 @@ class InfluxDb2ExtensionIT {
     @Container
     private final @NotNull HiveMQContainer hivemq =
             new HiveMQContainer(OciImages.getImageName("hivemq/extensions/hivemq-influxdb-extension")
-                    .asCompatibleSubstituteFor("hivemq/hivemq-ce")) //
+                    .asCompatibleSubstituteFor("hivemq/hivemq-ce"))
                     .withNetwork(network)
                     .withCopyToContainer(MountableFile.forClasspathResource("config-v2.properties"),
                             "/opt/hivemq/extensions/hivemq-influxdb-extension/conf/config.properties")

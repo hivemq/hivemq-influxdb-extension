@@ -126,9 +126,9 @@ public class InfluxDbExtensionMain implements ExtensionMain {
         try {
             final var version = configuration.getVersion();
             switch (version) {
-                case 1:
+                case 1 :
                     return setupV1Sender(configuration, mode, host, port, database, auth, connectTimeout, prefix);
-                case 2:
+                case 2 :
                     LOG.info("Creating InfluxDB v2 sender for {}, bucket {}, organization {}",
                             host,
                             bucket,
@@ -146,7 +146,7 @@ public class InfluxDbExtensionMain implements ExtensionMain {
                             prefix,
                             organization,
                             bucket);
-                case 3:
+                case 3 :
                     LOG.info("Creating InfluxDB v3 sender for {}:{}, database {}", host, port, database);
                     return new InfluxDbV3Sender(protocol,
                             host,
@@ -175,35 +175,21 @@ public class InfluxDbExtensionMain implements ExtensionMain {
             final int connectTimeout,
             final @NotNull String prefix) throws Exception {
         switch (mode) {
-            case "http":
+            case "http" :
                 LOG.info("Creating InfluxDB v1 HTTP sender for {}:{}, database {}", host, port, database);
-                return new InfluxDbHttpSender(configuration.getProtocolOrDefault("http"),
-                        host,
-                        port,
-                        database,
-                        auth,
-                        TimeUnit.SECONDS,
-                        connectTimeout,
-                        connectTimeout,
-                        prefix);
-            case "tcp":
+                return new InfluxDbHttpSender(configuration.getProtocolOrDefault(
+                        "http"), host, port, database, auth, TimeUnit.SECONDS, connectTimeout, connectTimeout, prefix);
+            case "tcp" :
                 LOG.info("Creating InfluxDB v1 TCP sender for {}:{}, database {}", host, port, database);
                 return new InfluxDbTcpSender(host, port, connectTimeout, database, prefix);
-            case "udp":
+            case "udp" :
                 LOG.info("Creating InfluxDB v1 UDP sender for {}:{}, database {}", host, port, database);
                 return new InfluxDbUdpSender(host, port, connectTimeout, database, prefix);
-            case "cloud":
+            case "cloud" :
                 LOG.warn("InfluxDB v1 does not support cloud sender, falling back to HTTP sender");
-                return new InfluxDbHttpSender(configuration.getProtocolOrDefault("https"),
-                        host,
-                        port,
-                        database,
-                        auth,
-                        TimeUnit.SECONDS,
-                        connectTimeout,
-                        connectTimeout,
-                        prefix);
-            default:
+                return new InfluxDbHttpSender(configuration.getProtocolOrDefault(
+                        "https"), host, port, database, auth, TimeUnit.SECONDS, connectTimeout, connectTimeout, prefix);
+            default :
                 LOG.error("Unsupported mode '{}' for InfluxDB v1 (supported modes: http, tcp, udp)", mode);
                 return null;
         }

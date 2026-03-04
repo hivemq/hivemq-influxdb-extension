@@ -33,8 +33,7 @@ import java.util.zip.GZIPOutputStream;
 /**
  * Sender for InfluxDB v3 using the {@code /api/v3/write_lp} endpoint.
  * <p>
- * Supports InfluxDB 3 Core, Enterprise, and Cloud.
- * Follows the same pattern as {@link InfluxDbCloudSender}.
+ * Supports InfluxDB 3 Core, Enterprise, and Cloud. Follows the same pattern as {@link InfluxDbCloudSender}.
  */
 public class InfluxDbV3Sender extends InfluxDbHttpSender {
 
@@ -91,11 +90,11 @@ public class InfluxDbV3Sender extends InfluxDbHttpSender {
             // check for non 2xx response code
             final var responseCode = con.getResponseCode();
             if (responseCode / 100 != 2) {
-                throw new IOException(String.format(
-                        "Server returned HTTP response code %d for URL '%s' with content: %s",
-                        responseCode,
-                        url,
-                        con.getResponseMessage()));
+                throw new IOException(
+                        String.format("Server returned HTTP response code %d for URL '%s' with content: %s",
+                                responseCode,
+                                url,
+                                con.getResponseMessage()));
             }
             return responseCode;
         } finally {
