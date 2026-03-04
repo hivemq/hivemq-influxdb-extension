@@ -52,8 +52,8 @@ class InfluxDbCloudSenderTest {
 
         sender.writeData("line=line".getBytes());
 
-        verify(postRequestedFor(urlEqualTo("/api/v2/write?precision=ms&org=testorg&bucket=testbucket")).withHeader(
-                "Authorization",
-                equalTo("Token token")).withRequestBody(equalTo("line=line")));
+        verify(postRequestedFor(urlEqualTo("/api/v2/write?precision=ms&org=testorg&bucket=testbucket"))
+                .withHeader("Authorization", equalTo("Token token"))
+                .withRequestBody(equalTo("line=line")));
     }
 }

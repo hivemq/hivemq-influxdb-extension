@@ -31,7 +31,7 @@ class PropertiesReaderTest {
 
     @Test
     void readPropertiesFromFile_file_null() {
-        //noinspection DataFlowIssue
+        // noinspection DataFlowIssue
         assertThatThrownBy(() -> new PropertiesReader(null) {
         }).isInstanceOf(NullPointerException.class);
     }
@@ -64,7 +64,7 @@ class PropertiesReaderTest {
         assertThat(propertiesReader.readPropertiesFromFile()).isTrue();
         assertThat(propertiesReader.getProperty("key")).isEqualTo("value");
 
-        //noinspection DataFlowIssue
+        // noinspection DataFlowIssue
         assertThatThrownBy(() -> propertiesReader.getProperty(null)).isInstanceOf(NullPointerException.class);
     }
 

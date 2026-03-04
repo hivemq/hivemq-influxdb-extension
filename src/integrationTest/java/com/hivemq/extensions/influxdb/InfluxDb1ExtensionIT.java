@@ -49,7 +49,7 @@ class InfluxDb1ExtensionIT {
     @Container
     private final @NotNull HiveMQContainer hivemq =
             new HiveMQContainer(OciImages.getImageName("hivemq/extensions/hivemq-influxdb-extension")
-                    .asCompatibleSubstituteFor("hivemq/hivemq-ce")) //
+                    .asCompatibleSubstituteFor("hivemq/hivemq-ce"))
                     .withNetwork(network)
                     .withCopyToContainer(MountableFile.forClasspathResource("config-v1.properties"),
                             "/opt/hivemq/extensions/hivemq-influxdb-extension/conf/config.properties")
@@ -91,7 +91,7 @@ class InfluxDb1ExtensionIT {
     void configAtLegacyLocation_metricsAreForwardedToInfluxDB() {
         final var legacyHivemq =
                 new HiveMQContainer(OciImages.getImageName("hivemq/extensions/hivemq-influxdb-extension")
-                        .asCompatibleSubstituteFor("hivemq/hivemq-ce")) //
+                        .asCompatibleSubstituteFor("hivemq/hivemq-ce"))
                         .withNetwork(network)
                         .withCopyToContainer(MountableFile.forClasspathResource("config-v1.properties"),
                                 "/opt/hivemq/extensions/hivemq-influxdb-extension/influxdb.properties")

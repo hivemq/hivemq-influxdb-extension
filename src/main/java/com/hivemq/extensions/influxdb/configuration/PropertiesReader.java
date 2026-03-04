@@ -63,9 +63,9 @@ abstract class PropertiesReader {
     /**
      * Fetch a property with given key from {@link Properties}.
      *
-     * @param key The name of the property to look for.
-     * @return The property for the value if it exists, <b>null</b> if key or {@link Properties} doesn't exist or the
-     *         value is an empty string.
+     * @param  key The name of the property to look for.
+     * @return     The property for the value if it exists, <b>null</b> if key or {@link Properties} doesn't exist or
+     *             the value is an empty string.
      */
     @Nullable String getProperty(final @NotNull String key) {
         Objects.requireNonNull(key, "Key to fetch property for must not be null.");
@@ -82,7 +82,7 @@ abstract class PropertiesReader {
     /**
      * Loads the properties from the configuration {@link File} into {@link Properties}.
      *
-     * @param file {@link File} where to load the properties from.
+     * @param  file        {@link File} where to load the properties from.
      * @throws IOException If properties could not be read from <b>file</b>.
      */
     private void loadProperties(final @NotNull File file) throws IOException {
