@@ -126,7 +126,7 @@ testing {
             }
             oci.of(this) {
                 imageDependencies {
-                    runtime(project).tag("latest")
+                    runtime(project()).tag("latest")
                 }
                 imageDependencies("v1") {
                     runtime("library:influxdb:1.12.2").name("influxdb").tag("v1")
